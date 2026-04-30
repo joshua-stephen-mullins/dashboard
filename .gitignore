@@ -1,5 +1,3 @@
-CLAUDE.md
-/docs/*
 .env
 *.env
 node_modules
