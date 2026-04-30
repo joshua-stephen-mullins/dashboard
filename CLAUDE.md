@@ -50,9 +50,9 @@ See `docs/TESTING.md` for testing setup, what to test, and examples.
 ---
 
 ## Current Status
-- [ ] Project scaffolded
-- [ ] Supabase project created
-- [ ] Auth implemented
+- [x] Project scaffolded
+- [x] Supabase project created
+- [x] Auth implemented
 - [ ] Soccer tab
 - [ ] Recipes tab
 - [ ] Stocks tab
