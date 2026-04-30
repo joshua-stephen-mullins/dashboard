@@ -1,5 +1,5 @@
 const BASE_URL = 'https://finnhub.io/api/v1'
-const API_KEY = import.meta.env.VITE_FINNHUB_KEY
+const API_KEY = import.meta.env.VITE_FINNHUB_API_KEY
 
 export async function finnhubGet(endpoint, params = {}) {
   const url = new URL(`${BASE_URL}/${endpoint}`)

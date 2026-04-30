@@ -1,5 +1,5 @@
 const BASE_URL = 'https://v3.football.api-sports.io'
-const API_KEY = import.meta.env.VITE_API_FOOTBALL_KEY
+const API_KEY = import.meta.env.VITE_FOOTBALL_API_KEY
 
 export async function footballGet(endpoint, params = {}) {
   const url = new URL(`${BASE_URL}/${endpoint}`)
