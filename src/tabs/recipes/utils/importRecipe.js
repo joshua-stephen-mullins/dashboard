@@ -6,7 +6,7 @@ const UNITS = new Set([
   'slice', 'slices', 'can', 'cans', 'package', 'packages', 'bunch',
 ])
 
-function parseIngredient(raw) {
+export function parseIngredient(raw) {
   const cleaned = raw.trim().replace(/\s+/g, ' ')
   const parts = cleaned.split(' ')
   let i = 0
@@ -28,7 +28,7 @@ function parseIngredient(raw) {
   return { quantity, unit, name: name || cleaned }
 }
 
-function parseIsoDuration(iso) {
+export function parseIsoDuration(iso) {
   const match = iso.match(/P(?:T?(\d+)H)?(?:T?(\d+)M)?/i)
   if (!match) return iso
   const hours = parseInt(match[1] || '0')
@@ -39,7 +39,7 @@ function parseIsoDuration(iso) {
   return iso
 }
 
-function extractJsonLdBlocks(html) {
+export function extractJsonLdBlocks(html) {
   const blocks = []
   const re = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
   let m
@@ -47,7 +47,7 @@ function extractJsonLdBlocks(html) {
   return blocks
 }
 
-function findRecipeNode(json) {
+export function findRecipeNode(json) {
   if (!json) return null
   if (json['@graph']) {
     for (const node of json['@graph']) {

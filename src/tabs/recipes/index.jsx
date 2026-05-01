@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useRecipes } from './hooks/useRecipes'
+import { filterRecipes } from './utils/filters'
 import RecipeCard from './components/RecipeCard/RecipeCard'
 import RecipeFormModal from './components/RecipeFormModal/RecipeFormModal'
 import RecipeDetailModal from './components/RecipeDetailModal/RecipeDetailModal'
@@ -22,17 +23,10 @@ export default function RecipesTab() {
     return [...set].sort()
   }, [recipes])
 
-  const filtered = useMemo(() => {
-    let list = recipes
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      list = list.filter((r) => r.name.toLowerCase().includes(q))
-    }
-    if (activeTags.length > 0) {
-      list = list.filter((r) => activeTags.every((t) => r.tags?.includes(t)))
-    }
-    return list
-  }, [recipes, search, activeTags])
+  const filtered = useMemo(
+    () => filterRecipes(recipes, search, activeTags),
+    [recipes, search, activeTags],
+  )
 
   function toggleTag(tag) {
     setActiveTags((prev) =>
