@@ -52,7 +52,17 @@ export default function CookingMode() {
     queryFn: () => fetchRecipe(id),
   })
   const [step, setStep] = useState(0)
+  const [checked, setChecked] = useState(new Set())
+  const [ingredientsOpen, setIngredientsOpen] = useState(true)
   useWakeLock()
+
+  function toggleIngredient(i) {
+    setChecked((prev) => {
+      const next = new Set(prev)
+      next.has(i) ? next.delete(i) : next.add(i)
+      return next
+    })
+  }
 
   if (isLoading) {
     return <div className={styles.loading}>Loading…</div>
@@ -79,12 +89,24 @@ export default function CookingMode() {
       </header>
 
       <div className={styles.body}>
-        <aside className={styles.ingredients}>
-          <h2 className={styles.sectionTitle}>Ingredients</h2>
+        <aside className={`${styles.ingredients}${!ingredientsOpen ? ` ${styles.ingredientsCollapsed}` : ''}`}>
+          <button className={styles.ingredientsToggle} onClick={() => setIngredientsOpen((o) => !o)}>
+            <h2 className={styles.sectionTitle}>Ingredients</h2>
+            <span className={styles.toggleIcon}>{ingredientsOpen ? '▲' : '▼'}</span>
+          </button>
           <ul className={styles.ingredientList}>
             {recipe.ingredients?.map((ing, i) => (
-              <li key={i} className={styles.ingredient}>
-                {[ing.quantity, ing.unit, ing.name].filter(Boolean).join(' ')}
+              <li
+                key={i}
+                className={`${styles.ingredient}${checked.has(i) ? ` ${styles.ingredientChecked}` : ''}`}
+                onClick={() => toggleIngredient(i)}
+              >
+                <span className={`${styles.checkbox}${checked.has(i) ? ` ${styles.checkboxChecked}` : ''}`}>
+                  {checked.has(i) ? '✓' : ''}
+                </span>
+                <span className={checked.has(i) ? styles.ingredientText : undefined}>
+                  {[ing.quantity, ing.unit, ing.name].filter(Boolean).join(' ')}
+                </span>
               </li>
             ))}
           </ul>
@@ -95,38 +117,39 @@ export default function CookingMode() {
             {hasSteps ? `Step ${step + 1} of ${steps.length}` : 'Instructions'}
           </h2>
 
-          {hasSteps ? (
-            <>
-              <p className={styles.stepText}>{steps[step]}</p>
-              <div className={styles.stepNav}>
-                <button
-                  className={styles.navBtn}
-                  onClick={() => setStep((s) => s - 1)}
-                  disabled={step === 0}
-                >
-                  ← Previous
-                </button>
-                <div className={styles.stepDots}>
-                  {steps.map((_, i) => (
-                    <button
-                      key={i}
-                      className={`${styles.dot}${i === step ? ` ${styles.dotActive}` : ''}`}
-                      onClick={() => setStep(i)}
-                      aria-label={`Step ${i + 1}`}
-                    />
-                  ))}
-                </div>
-                <button
-                  className={styles.navBtn}
-                  onClick={() => setStep((s) => s + 1)}
-                  disabled={step === steps.length - 1}
-                >
-                  Next →
-                </button>
+          <div className={styles.stepTextWrap}>
+            <p className={styles.stepText}>
+              {hasSteps ? steps[step] : recipe.instructions}
+            </p>
+          </div>
+
+          {hasSteps && (
+            <div className={styles.stepNav}>
+              <button
+                className={styles.navBtn}
+                onClick={() => setStep((s) => s - 1)}
+                disabled={step === 0}
+              >
+                ← Previous
+              </button>
+              <div className={styles.stepDots}>
+                {steps.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`${styles.dot}${i === step ? ` ${styles.dotActive}` : ''}`}
+                    onClick={() => setStep(i)}
+                    aria-label={`Step ${i + 1}`}
+                  />
+                ))}
               </div>
-            </>
-          ) : (
-            <p className={styles.stepText}>{recipe.instructions}</p>
+              <button
+                className={styles.navBtn}
+                onClick={() => setStep((s) => s + 1)}
+                disabled={step === steps.length - 1}
+              >
+                Next →
+              </button>
+            </div>
           )}
         </main>
       </div>
