@@ -31,6 +31,7 @@ export default function AddTeamModal({ onClose, onFollow, followedTeamIds }) {
       team_id: team.id,
       team_name: team.name,
       league: team.country ?? league,
+      logo_url: team.logo ?? null,
     })
     onClose()
   }

@@ -17,6 +17,7 @@ Stores the teams the user has chosen to follow for fixture tracking.
 | team_id | integer | ID from API-Football |
 | team_name | text | Display name |
 | league | text | e.g. "Premier League" |
+| logo_url | text | Nullable — team crest URL from API-Football, stored at follow time |
 | created_at | timestamp | Auto-generated |
 
 ---

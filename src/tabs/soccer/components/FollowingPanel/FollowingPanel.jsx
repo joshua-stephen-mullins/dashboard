@@ -23,6 +23,9 @@ export default function FollowingPanel({ teams, players, onFollowTeam, onUnfollo
           <ul className={styles.list}>
             {teams.map((t) => (
               <li key={t.id} className={styles.item}>
+                {t.logo_url && (
+                  <img className={styles.teamLogo} src={t.logo_url} alt={t.team_name} />
+                )}
                 <span className={styles.itemName}>{t.team_name}</span>
                 <button className={styles.unfollowBtn} onClick={() => onUnfollowTeam(t.id)}>×</button>
               </li>

@@ -19,11 +19,11 @@ export function useFollowedTeams() {
   })
 
   const follow = useMutation({
-    mutationFn: async ({ team_id, team_name, league }) => {
+    mutationFn: async ({ team_id, team_name, league, logo_url }) => {
       const { data: { user } } = await supabase.auth.getUser()
       const { error } = await supabase
         .from('soccer_followed_teams')
-        .insert({ user_id: user.id, team_id, team_name, league })
+        .insert({ user_id: user.id, team_id, team_name, league, logo_url })
       if (error) throw error
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['soccer_followed_teams'] }),
