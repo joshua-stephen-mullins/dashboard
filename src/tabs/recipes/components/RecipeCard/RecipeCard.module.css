@@ -1,10 +1,13 @@
 .card {
+  display: flex;
+  flex-direction: column;
   background: var(--color-bg-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   text-align: left;
+  padding: 0;
   width: 100%;
   transition: border-color 0.15s, transform 0.15s;
 }
@@ -16,9 +19,10 @@
 
 .imageWrap {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: 160px;
   background: var(--color-bg-3);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .image {
@@ -69,26 +73,6 @@
   flex-wrap: wrap;
   gap: var(--space-1);
   margin-top: var(--space-1);
-  flex: 1;
-}
-
-.cookBtn {
-  align-self: flex-end;
-  margin-top: var(--space-3);
-  background: transparent;
-  border: 1px solid var(--color-border-2);
-  border-radius: var(--radius-sm);
-  color: var(--color-accent);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  padding: var(--space-1) var(--space-3);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.cookBtn:hover {
-  background: rgba(79, 142, 247, 0.1);
-  border-color: var(--color-accent);
 }
 
 .tag {

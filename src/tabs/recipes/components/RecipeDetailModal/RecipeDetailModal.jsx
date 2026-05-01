@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import Modal from '../../../../components/Modal/Modal'
 import styles from './RecipeDetailModal.module.css'
 
 export default function RecipeDetailModal({ recipe, onEdit, onDelete, onClose }) {
+  const [confirming, setConfirming] = useState(false)
+
   async function handleDelete() {
-    if (!window.confirm(`Delete "${recipe.name}"?`)) return
     await onDelete(recipe.id)
     onClose()
   }
@@ -22,16 +24,25 @@ export default function RecipeDetailModal({ recipe, onEdit, onDelete, onClose })
           {recipe.servings && (
             <span className={styles.metaItem}>👤 {recipe.servings} servings</span>
           )}
-          {recipe.source_url && (
-            <a
-              className={styles.sourceLink}
-              href={recipe.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
+          <div className={styles.metaLinks}>
+            {recipe.source_url && (
+              <a
+                className={styles.sourceLink}
+                href={recipe.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View source ↗
+              </a>
+            )}
+            <button
+              className={styles.cookBtn}
+              type="button"
+              onClick={() => window.open(`/cook/${recipe.id}`, '_blank', 'noopener')}
             >
-              View source ↗
-            </a>
-          )}
+              Cook mode
+            </button>
+          </div>
         </div>
 
         {recipe.tags?.length > 0 && (
@@ -62,14 +73,28 @@ export default function RecipeDetailModal({ recipe, onEdit, onDelete, onClose })
           </section>
         )}
 
-        <div className={styles.actions}>
-          <button className={styles.deleteBtn} type="button" onClick={handleDelete}>
-            Delete
-          </button>
-          <button className={styles.editBtn} type="button" onClick={() => onEdit(recipe)}>
-            Edit
-          </button>
-        </div>
+        {confirming ? (
+          <div className={styles.confirmRow}>
+            <span className={styles.confirmText}>Delete "{recipe.name}"?</span>
+            <div className={styles.confirmActions}>
+              <button className={styles.cancelBtn} type="button" onClick={() => setConfirming(false)}>
+                Cancel
+              </button>
+              <button className={styles.confirmDeleteBtn} type="button" onClick={handleDelete}>
+                Delete
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.actions}>
+            <button className={styles.deleteBtn} type="button" onClick={() => setConfirming(true)}>
+              Delete
+            </button>
+            <button className={styles.editBtn} type="button" onClick={() => onEdit(recipe)}>
+              Edit
+            </button>
+          </div>
+        )}
       </div>
     </Modal>
   )

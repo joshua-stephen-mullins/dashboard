@@ -135,7 +135,7 @@ export default function RecipeFormModal({ recipe, onSave, onClose }) {
   }
 
   return (
-    <Modal title={isEdit ? 'Edit Recipe' : 'Add Recipe'} onClose={onClose}>
+    <Modal title={isEdit ? 'Edit Recipe' : 'Add Recipe'} onClose={onClose} closeOnOverlay={false} closeOnEscape={false}>
       <form onSubmit={handleSave} className={styles.form}>
         {!isEdit && (
           <>
