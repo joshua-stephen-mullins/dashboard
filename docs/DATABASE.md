@@ -30,7 +30,9 @@ Stores individual players the user wants to track independently of teams.
 | user_id | uuid | Foreign key → auth.users |
 | player_id | integer | ID from API-Football |
 | player_name | text | Display name |
-| team_name | text | Current team |
+| team_name | text | Current team display name |
+| team_id | integer | Nullable — ID from API-Football; used to fetch fixtures for the player's team |
+| photo_url | text | Nullable — player headshot URL from API-Football, stored at follow time |
 | created_at | timestamp | Auto-generated |
 
 ---
