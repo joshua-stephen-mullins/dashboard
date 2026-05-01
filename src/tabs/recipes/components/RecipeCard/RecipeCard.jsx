@@ -1,8 +1,14 @@
 import styles from './RecipeCard.module.css'
 
 export default function RecipeCard({ recipe, onClick }) {
+  function openCookingMode(e) {
+    e.stopPropagation()
+    window.open(`/cook/${recipe.id}`, '_blank', 'noopener')
+  }
+
   return (
-    <button className={styles.card} onClick={onClick} type="button">
+    <div className={styles.card} onClick={onClick} role="button" tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick()}>
       <div className={styles.imageWrap}>
         {recipe.image_url ? (
           <img className={styles.image} src={recipe.image_url} alt={recipe.name} />
@@ -33,7 +39,11 @@ export default function RecipeCard({ recipe, onClick }) {
             )}
           </div>
         )}
+
+        <button className={styles.cookBtn} onClick={openCookingMode} type="button">
+          Cook
+        </button>
       </div>
-    </button>
+    </div>
   )
 }

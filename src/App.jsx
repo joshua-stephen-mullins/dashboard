@@ -7,6 +7,7 @@ import Layout from './components/Layout/Layout'
 import LoginPage from './tabs/login/index'
 import SoccerTab from './tabs/soccer/index'
 import RecipesTab from './tabs/recipes/index'
+import CookingMode from './tabs/recipes/CookingMode'
 import StocksTab from './tabs/stocks/index'
 import CalendarTab from './tabs/calendar/index'
 
@@ -27,6 +28,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/cook/:id" element={<ProtectedRoute><CookingMode /></ProtectedRoute>} />
             <Route element={<Layout />}>
               <Route path="/" element={<Navigate to="/soccer" replace />} />
               <Route path="/soccer" element={<ProtectedRoute><SoccerTab /></ProtectedRoute>} />

@@ -66,10 +66,23 @@ describe('RecipeCard', () => {
     expect(screen.getByText('+2')).toBeInTheDocument()
   })
 
-  it('calls onClick when the card is clicked', async () => {
+  it('renders the Cook button', () => {
+    render(<RecipeCard recipe={baseRecipe} onClick={() => {}} />)
+    expect(screen.getByRole('button', { name: 'Cook' })).toBeInTheDocument()
+  })
+
+  it('opens cooking mode in a new tab when Cook is clicked', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    render(<RecipeCard recipe={baseRecipe} onClick={() => {}} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Cook' }))
+    expect(openSpy).toHaveBeenCalledWith('/cook/1', '_blank', 'noopener')
+    openSpy.mockRestore()
+  })
+
+  it('calls onClick when the card body is clicked', async () => {
     const onClick = vi.fn()
     render(<RecipeCard recipe={baseRecipe} onClick={onClick} />)
-    await userEvent.click(screen.getByRole('button'))
+    await userEvent.click(screen.getByText('Pasta Carbonara'))
     expect(onClick).toHaveBeenCalledOnce()
   })
 })
