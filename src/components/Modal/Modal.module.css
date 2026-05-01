@@ -50,6 +50,6 @@
 
 .body {
   padding: var(--space-5) var(--space-6);
-  overflow-y: auto;
+  overflow: visible;
   flex: 1;
 }

@@ -10,7 +10,15 @@ import RecipesTab from './tabs/recipes/index'
 import StocksTab from './tabs/stocks/index'
 import CalendarTab from './tabs/calendar/index'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      gcTime: 30 * 60 * 1000,
+    },
+  },
+})
 
 export default function App() {
   return (
