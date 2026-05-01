@@ -1,0 +1,227 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.importRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.importBtn {
+  background: var(--color-bg-4);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: 0 var(--space-4);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.importBtn:hover:not(:disabled) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.importBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-1) 0;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+
+.input {
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.input[type="file"] {
+  padding: var(--space-2);
+}
+
+.textarea {
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  transition: border-color 0.15s;
+  line-height: 1.6;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+
+.addBtn {
+  background: transparent;
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: rgba(79, 142, 247, 0.1);
+}
+
+.ingredientList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ingredientRow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.inputSm {
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  width: 72px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.inputSm:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.inputFlex {
+  flex: 1;
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-3);
+  font-size: var(--text-sm);
+  padding: var(--space-1);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.removeBtn:hover {
+  color: var(--color-red);
+}
+
+.error {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-red);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.cancelBtn:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-2);
+}
+
+.saveBtn {
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
