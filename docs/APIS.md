@@ -8,6 +8,7 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 VITE_FOOTBALL_API_KEY=
 VITE_FINNHUB_API_KEY=
+VITE_ALPHA_VANTAGE_API_KEY=
 ```
 
 A `.env.example` file with these keys (empty values) is committed to the repo so it's clear what variables are needed.
@@ -126,6 +127,62 @@ Use this when the user adds a new holding to auto-fill the company name.
 ### Caching
 React Query should cache quote responses for **1 minute** (`staleTime: 60 * 1000`). Prices refresh automatically on tab focus.
 
+### Fallback behaviour
+Finnhub's free tier does not support mutual funds or some other security types — these requests return a **403**. When a 403 is detected, the quote and company lookup automatically fall back to Alpha Vantage (see below). This is handled transparently in `useStockQuotes` and `HoldingFormModal`; the rest of the UI sees normalised data regardless of which API sourced it.
+
+---
+
+## Alpha Vantage
+
+### About
+Used as a **fallback only** for tickers that Finnhub rejects with a 403 (mutual funds, some ETFs). Not used for tickers that Finnhub supports.
+
+### Base URL
+```
+https://www.alphavantage.co/query
+```
+
+### Auth
+Pass the API key as a query parameter:
+```
+?apikey=<VITE_ALPHA_VANTAGE_API_KEY>
+```
+
+### Client
+Located at `src/lib/alphaVantage.js`.
+
+### Endpoints Used
+
+#### Get quote for a ticker
+```
+GET /query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={key}
+```
+
+#### Response shape (key fields extracted)
+```json
+{
+  "Global Quote": {
+    "05. price": "14.23",
+    "09. change": "0.12",
+    "10. change percent": "0.85%"
+  }
+}
+```
+
+The client normalises this to `{ c, d, dp }` to match the Finnhub quote shape so the rest of the app doesn't need to know which API was used.
+
+#### Get company profile (for company name)
+```
+GET /query?function=OVERVIEW&symbol={ticker}&apikey={key}
+```
+Returns `{ Name, ... }`. Used in `HoldingFormModal` when Finnhub's `/stock/profile2` returns a 403.
+
+### Caching
+Alpha Vantage fallback quotes are cached for **4 hours** (`staleTime: 4 * 60 * 60 * 1000`) with no window-focus refetch. Mutual fund NAV only updates once daily after market close, so 1-minute freshness is unnecessary and would exhaust the free tier limit quickly.
+
+### Rate Limits (free tier)
+**25 requests/day.** This is why Alpha Vantage is a targeted fallback rather than the primary API. With a 4-hour stale time, a handful of mutual fund holdings will comfortably stay within this limit.
+
 ---
 
 ## Supabase Edge Functions
@@ -146,5 +203,6 @@ Used to parse recipe data from a URL the user provides.
 | API | Free Tier Limit | Notes |
 |---|---|---|
 | API-Football | 100 requests/day | Cache aggressively — 10 min stale time |
-| Finnhub | 60 requests/minute | 1 min stale time, batch requests where possible |
+| Finnhub | 60 requests/minute | 1 min stale time, refetch on window focus |
+| Alpha Vantage | 25 requests/day | Fallback only — 4 hr stale time, no window-focus refetch |
 | Supabase | Generous free tier | No concerns for personal use |
