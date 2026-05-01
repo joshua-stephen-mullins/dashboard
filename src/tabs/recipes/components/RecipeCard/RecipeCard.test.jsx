@@ -20,12 +20,12 @@ describe('RecipeCard', () => {
 
   it('renders cook time when provided', () => {
     render(<RecipeCard recipe={baseRecipe} onClick={() => {}} />)
-    expect(screen.getByText('⏱ 30 min')).toBeInTheDocument()
+    expect(screen.getByText('30 min')).toBeInTheDocument()
   })
 
   it('renders servings when provided', () => {
     render(<RecipeCard recipe={baseRecipe} onClick={() => {}} />)
-    expect(screen.getByText('👤 4')).toBeInTheDocument()
+    expect(screen.getByText('4')).toBeInTheDocument()
   })
 
   it('renders tags', () => {
@@ -51,13 +51,13 @@ describe('RecipeCard', () => {
   it('does not render cook time when not provided', () => {
     const recipe = { ...baseRecipe, cook_time: null }
     render(<RecipeCard recipe={recipe} onClick={() => {}} />)
-    expect(screen.queryByText(/⏱/)).not.toBeInTheDocument()
+    expect(screen.queryByText('30 min')).not.toBeInTheDocument()
   })
 
   it('does not render servings when not provided', () => {
     const recipe = { ...baseRecipe, servings: null }
     render(<RecipeCard recipe={recipe} onClick={() => {}} />)
-    expect(screen.queryByText(/👤/)).not.toBeInTheDocument()
+    expect(screen.queryByText('4')).not.toBeInTheDocument()
   })
 
   it('shows overflow count when there are more than 3 tags', () => {
