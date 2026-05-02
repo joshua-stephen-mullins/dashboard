@@ -48,9 +48,9 @@ export default function FixtureCard({ fixture, playersByTeamId = {} }) {
 
       <div className={styles.matchup}>
         <div className={styles.team}>
-          <PlayerTags players={homePlayers} />
           <img className={styles.logo} src={teams.home.logo} alt={teams.home.name} />
           <span className={styles.teamName}>{teams.home.name}</span>
+          <PlayerTags players={homePlayers} />
         </div>
 
         <div className={styles.score}>
@@ -64,9 +64,9 @@ export default function FixtureCard({ fixture, playersByTeamId = {} }) {
         </div>
 
         <div className={`${styles.team} ${styles.teamAway}`}>
-          <PlayerTags players={awayPlayers} />
           <img className={styles.logo} src={teams.away.logo} alt={teams.away.name} />
           <span className={styles.teamName}>{teams.away.name}</span>
+          <PlayerTags players={awayPlayers} />
         </div>
       </div>
     </div>

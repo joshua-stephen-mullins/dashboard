@@ -200,3 +200,25 @@
 .colorPurple { background-color: var(--color-accent-2); }
 .colorOrange { background-color: #f97316; }
 .colorPink   { background-color: #ec4899; }
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .weekRow {
+    min-height: 88px;
+  }
+
+  .dayCol {
+    padding: 2px var(--space-1);
+  }
+
+  .dayNum {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .eventBar {
+    font-size: 10px;
+  }
+}

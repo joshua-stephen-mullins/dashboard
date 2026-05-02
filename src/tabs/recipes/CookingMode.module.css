@@ -51,9 +51,18 @@
 }
 
 .metaItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--font-mono);
   font-size: var(--text-base);
   color: var(--color-text-2);
+}
+
+.metaIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .closeBtn {

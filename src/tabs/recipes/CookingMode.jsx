@@ -81,8 +81,24 @@ export default function CookingMode() {
         <div className={styles.headerMeta}>
           <h1 className={styles.title}>{recipe.name}</h1>
           <div className={styles.meta}>
-            {recipe.cook_time && <span className={styles.metaItem}>⏱ {recipe.cook_time}</span>}
-            {recipe.servings && <span className={styles.metaItem}>👤 {recipe.servings} servings</span>}
+            {recipe.cook_time && (
+              <span className={styles.metaItem}>
+                <svg className={styles.metaIcon} viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M6 3v3l2 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {recipe.cook_time}
+              </span>
+            )}
+            {recipe.servings && (
+              <span className={styles.metaItem}>
+                <svg className={styles.metaIcon} viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <circle cx="6" cy="4" r="2" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M2 10c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {recipe.servings} servings
+              </span>
+            )}
           </div>
         </div>
         <button className={styles.closeBtn} onClick={() => window.close()}>✕ Exit</button>

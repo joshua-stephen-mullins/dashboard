@@ -59,3 +59,36 @@
 .logout:hover {
   color: var(--color-text-2);
 }
+
+@media (max-width: 640px) {
+  .nav {
+    gap: var(--space-3);
+    padding: 0 var(--space-3);
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .tabs {
+    gap: var(--space-1);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  .logout {
+    padding: 6px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
