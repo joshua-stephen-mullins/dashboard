@@ -88,11 +88,12 @@ Stores the user's personal calendar events.
 | id | uuid | Primary key, auto-generated |
 | user_id | uuid | Foreign key → auth.users |
 | title | text | Event name |
-| date | date | Event date |
-| start_time | time | Optional start time |
-| end_time | time | Optional — defaults to same day if omitted |
+| date | date | Event start date |
+| end_date | date | Nullable — if set, event spans from `date` to `end_date` inclusive |
+| start_time | time | Nullable — optional start time |
+| end_time | time | Nullable — optional end time |
 | location | text | Nullable — optional location |
-| color | text | Color key e.g. "blue", "red", "green", "amber", "teal" |
+| color | text | Color key: "blue", "green", "amber", "red", "teal", "purple", "orange", "pink" |
 | notes | text | Nullable — optional notes |
 | created_at | timestamp | Auto-generated |
 

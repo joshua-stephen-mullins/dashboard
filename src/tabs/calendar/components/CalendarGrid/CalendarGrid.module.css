@@ -1,0 +1,202 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1;
+  min-width: 0;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.navBtn {
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.navBtn:hover {
+  background: var(--color-bg-4);
+  border-color: var(--color-border-2);
+}
+
+.monthLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ── Grid shell ─────────────────────────────────────────────── */
+
+.grid {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* ── DOW header row ─────────────────────────────────────────── */
+
+.dowRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--color-bg-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dowHeader {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-3);
+  text-align: center;
+  padding: var(--space-2) 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Week rows ──────────────────────────────────────────────── */
+
+/*
+ * weekRow is a 7-column grid so each dayCol spans the full row height.
+ * position:relative is required for the absolutely-positioned eventsOverlay.
+ */
+.weekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  min-height: 120px;
+  position: relative;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.weekRowLast {
+  border-bottom: none;
+}
+
+/* ── Day columns ────────────────────────────────────────────── */
+
+.dayCol {
+  padding: var(--space-1) var(--space-2);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.dayCol:last-child {
+  border-right: none;
+}
+
+.dayCol:hover {
+  background: var(--color-bg-3);
+}
+
+.dayColOtherMonth {
+  opacity: 0.35;
+}
+
+.dayColToday {
+  background: rgba(79, 142, 247, 0.06);
+}
+
+.dayColToday:hover {
+  background: rgba(79, 142, 247, 0.12);
+}
+
+.dayNum {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+  line-height: 1;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.dayNumToday {
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ── Events overlay ─────────────────────────────────────────── */
+
+/*
+ * Sits at the bottom of the weekRow above the dayCol elements.
+ * pointer-events:none lets clicks fall through to the dayCol beneath;
+ * individual eventBar buttons re-enable pointer events for themselves.
+ */
+.eventsOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--events-h, 0px);
+  pointer-events: none;
+}
+
+/* ── Event bars ─────────────────────────────────────────────── */
+
+/*
+ * BAR_HEIGHT = 20px, BAR_GAP = 2px, BAR_SLOT = 22px
+ * These values must stay in sync with the constants in utils/calendar.js.
+ */
+.eventBar {
+  position: absolute;
+  left: calc(var(--col-start, 0) / 7 * 100% + 3px);
+  width: calc(var(--col-span, 1) / 7 * 100% - 6px);
+  bottom: calc(var(--track, 0) * 22px + 2px);
+  height: 20px;
+
+  pointer-events: auto;
+  border: none;
+  border-radius: 3px;
+  padding: 0 var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.1s, filter 0.1s;
+}
+
+.eventBar:hover {
+  opacity: 0.88;
+  filter: brightness(1.1);
+}
+
+/* ── Event color variants ───────────────────────────────────── */
+
+.colorBlue   { background-color: var(--color-accent); }
+.colorGreen  { background-color: var(--color-green); }
+.colorAmber  { background-color: var(--color-amber); }
+.colorRed    { background-color: var(--color-red); }
+.colorTeal   { background-color: var(--color-teal); }
+.colorPurple { background-color: var(--color-accent-2); }
+.colorOrange { background-color: #f97316; }
+.colorPink   { background-color: #ec4899; }
