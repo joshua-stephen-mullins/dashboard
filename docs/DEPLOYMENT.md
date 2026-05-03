@@ -41,8 +41,9 @@ Before deploying, add all environment variables in Vercel:
 ```
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
-VITE_FOOTBALL_API_KEY
+VITE_API_FOOTBALL_KEY
 VITE_FINNHUB_API_KEY
+VITE_ALPHA_VANTAGE_API_KEY
 ```
 
 These must match exactly what is in your local `.env` file. Vercel injects them at build time.
