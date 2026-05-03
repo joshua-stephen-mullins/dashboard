@@ -53,3 +53,10 @@
   overflow-y: auto;
   flex: 1;
 }
+
+@media (max-width: 640px) {
+  .panel {
+    max-width: calc(100% - var(--space-8));
+    max-height: 90vh;
+  }
+}

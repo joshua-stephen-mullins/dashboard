@@ -19,9 +19,18 @@
 }
 
 .metaItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   color: var(--color-text-2);
+}
+
+.metaIcon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
 }
 
 .metaLinks {

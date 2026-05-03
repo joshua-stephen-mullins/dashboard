@@ -6,6 +6,12 @@
   gap: var(--space-4);
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+  }
+}
+
 .heading {
   font-family: var(--font-sans);
   font-size: var(--text-base);

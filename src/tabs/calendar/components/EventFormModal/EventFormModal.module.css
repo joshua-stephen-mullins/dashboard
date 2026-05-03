@@ -42,6 +42,16 @@
   gap: var(--space-3);
 }
 
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .colorRow {
+    flex-wrap: wrap;
+  }
+}
+
 .textarea {
   background: var(--color-bg-3);
   border: 1px solid var(--color-border);

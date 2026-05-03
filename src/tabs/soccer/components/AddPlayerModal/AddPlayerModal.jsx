@@ -17,7 +17,9 @@ const LEAGUES = [
 
 function LeaguePicker({ value, onChange }) {
   const [open, setOpen] = useState(false)
+  const [listPos, setListPos] = useState({ top: 0, left: 0, width: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
   const selected = LEAGUES.find((l) => l.id === value)
 
   useEffect(() => {
@@ -28,14 +30,25 @@ function LeaguePicker({ value, onChange }) {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  function handleToggle() {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setListPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+    }
+    setOpen((o) => !o)
+  }
+
   return (
     <div className={styles.picker} ref={ref}>
-      <button type="button" className={styles.pickerBtn} onClick={() => setOpen((o) => !o)}>
+      <button type="button" ref={btnRef} className={styles.pickerBtn} onClick={handleToggle}>
         <span>{selected?.name}</span>
         <span className={styles.pickerChevron}>▾</span>
       </button>
       {open && (
-        <ul className={styles.pickerList}>
+        <ul
+          className={styles.pickerList}
+          style={{ top: listPos.top, left: listPos.left, width: listPos.width }}
+        >
           {LEAGUES.map((l) => (
             <li
               key={l.id}
