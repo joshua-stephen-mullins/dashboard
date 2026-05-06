@@ -13,6 +13,7 @@ Dashboard is a personal dashboard SPA built for a single user. It aggregates eve
 - **Soccer Data**: API-Football
 - **Stock Data**: Finnhub
 - **Recipe URL Parsing**: Supabase Edge Functions
+- **MCP Server**: Cloudflare Workers + MCP SDK (assistant access to dashboard data)
 
 ---
 
@@ -47,6 +48,9 @@ See `docs/STYLING.md` for CSS Modules conventions, design tokens, and global sty
 ## Testing
 See `docs/TESTING.md` for testing setup, what to test, and examples.
 
+## MCP Server
+See `docs/MCP.md` for the Cloudflare Workers MCP server — tools exposed, auth model, deployment, and how to register with Claude Code and Claude.ai.
+
 ---
 
 ## Current Status
@@ -58,6 +62,7 @@ See `docs/TESTING.md` for testing setup, what to test, and examples.
 - [ ] Stocks tab
 - [ ] Calendar tab
 - [ ] Deployment
+- [ ] MCP server (Cloudflare Workers)
 
 ---
 
@@ -69,3 +74,4 @@ See `docs/TESTING.md` for testing setup, what to test, and examples.
 - Never store API keys in frontend code — use environment variables
 - Never skip the privacy mode check when rendering stock values
 - Never add Google Calendar sync — that is planned for a future phase
+- Never expose the MCP auth secret or Supabase service-role key in the `mcp/` source code — both must live in Cloudflare environment variables only

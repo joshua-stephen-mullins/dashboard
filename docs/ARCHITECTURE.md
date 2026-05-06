@@ -44,6 +44,16 @@ dashboard/
 │   │   └── tokens.css             # Design tokens (colors, spacing, fonts)
 │   ├── App.jsx                    # Root component, routing
 │   └── main.jsx                   # Entry point
+├── mcp/                           # Cloudflare Workers MCP server (separate deployable)
+│   ├── src/
+│   │   ├── index.ts               # Worker entry point + MCP server setup
+│   │   └── tools/
+│   │       ├── recipes.ts         # Recipe read/write tools
+│   │       ├── fixtures.ts        # Soccer fixtures tools
+│   │       ├── stocks.ts          # Stock holdings tools
+│   │       └── calendar.ts        # Calendar event tools
+│   ├── wrangler.toml              # Cloudflare Workers config
+│   └── package.json
 ├── .env                           # Local environment variables (never commit)
 ├── .env.example                   # Template showing required env vars (safe to commit)
 ├── .gitignore
@@ -51,6 +61,8 @@ dashboard/
 ├── package.json
 └── vite.config.js
 ```
+
+**The `mcp/` directory is a fully independent deployable.** It has its own `package.json` and is deployed separately via `wrangler deploy`. The React app does not import from it and it does not import from the React app. They share the same Supabase project but access it independently.
 
 ---
 

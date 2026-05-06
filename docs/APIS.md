@@ -199,6 +199,16 @@ Used to parse recipe data from a URL the user provides.
 
 ---
 
+## MCP Server — Supabase Access
+
+The MCP server (`mcp/`) accesses Supabase using the **service-role key**, not the anon key. This key bypasses all RLS policies and has full read/write access to the database.
+
+**This key must never appear in source code.** It is stored exclusively as a Cloudflare Workers secret (`SUPABASE_SERVICE_ROLE_KEY`) and injected at runtime. The MCP server's own auth layer (bearer token check) is the only access control in front of it.
+
+The MCP server does not use the frontend's Supabase client (`src/lib/supabase.js`). It initialises its own client using the service-role key inside the Worker.
+
+---
+
 ## Rate Limits
 | API | Free Tier Limit | Notes |
 |---|---|---|
@@ -206,3 +216,4 @@ Used to parse recipe data from a URL the user provides.
 | Finnhub | 60 requests/minute | 1 min stale time, refetch on window focus |
 | Alpha Vantage | 25 requests/day | Fallback only — 4 hr stale time, no window-focus refetch |
 | Supabase | Generous free tier | No concerns for personal use |
+| Cloudflare Workers | 100,000 requests/day | Free tier — no concerns for personal assistant use |

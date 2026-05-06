@@ -126,3 +126,40 @@ The `.env.example` file (with empty values) **should** be committed so it's clea
 - [ ] App loads at `https://yourdomain.com`
 - [ ] Login works in production
 - [ ] Supabase RLS policies are enabled on all tables
+
+---
+
+## MCP Server — Cloudflare Workers
+
+The MCP server lives in `mcp/` and is deployed independently to Cloudflare Workers. It is a separate deployable from the React app — Vercel has no knowledge of it.
+
+See `docs/MCP.md` for full setup, tool list, and registration instructions.
+
+### Deploy the MCP server
+
+```bash
+cd mcp
+npm install
+wrangler deploy
+```
+
+This deploys the Worker and returns a `*.workers.dev` URL. Register that URL with Claude Code and Claude.ai — see `docs/MCP.md`.
+
+### Secrets (never in source code)
+
+Set these in the Cloudflare dashboard (Workers → your worker → Settings → Variables → Secret):
+
+| Secret | Description |
+|---|---|
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service-role key — bypasses RLS, never expose publicly |
+| `MCP_AUTH_SECRET` | A strong random string — Claude sends this as a bearer token to authenticate requests |
+
+### Two independent deployments
+
+| Target | Command | Platform |
+|---|---|---|
+| React frontend | `vercel deploy` (or push to `main`) | Vercel |
+| MCP server | `cd mcp && wrangler deploy` | Cloudflare Workers |
+
+Each can be deployed independently. A change to the MCP server does not require redeploying the frontend and vice versa.
