@@ -185,6 +185,46 @@ Alpha Vantage fallback quotes are cached for **4 hours** (`staleTime: 4 * 60 * 6
 
 ---
 
+## TSP Fund Pricing
+
+### About
+TSP (Thrift Savings Plan) funds are government retirement funds not available through Finnhub or Alpha Vantage. Pricing is handled by a dedicated Supabase edge function (`tsp-quote`) that fetches data from two public sources.
+
+### Ticker Format
+TSP funds use a custom `TSP-` prefix so the app can identify them and route pricing correctly. Examples: `TSP-C`, `TSP-S`, `TSP-L2050`, `TSP-LINCOME`. See the full map in `src/lib/tsp.js` (`TSP_FUND_NAMES`) and `supabase/functions/tsp-quote/index.ts` (`TICKER_TO_FUND`).
+
+### Edge Function
+- **Function name**: `tsp-quote`
+- **Trigger**: Called via `supabase.functions.invoke('tsp-quote')` from `src/lib/tsp.js`
+- **Output**: `{ 'TSP-C': { c, d, dp }, 'TSP-F': { c, d, dp }, ... }` — same normalised shape as Finnhub and Alpha Vantage
+
+### Primary Data Source — dailytsp.com
+```
+GET https://api.dailytsp.com/close/
+```
+- Public endpoint, no auth required
+- Returns all fund prices for the most recent trading day, keyed by date then fund name
+- Example: `{ "2026-05-06": { "C Fund": 93.6957, "G Fund": 18.5491, ... } }`
+
+### Previous-Day Prices — tsp.gov CSV
+```
+GET https://www.tsp.gov/data/fund-price-history.csv?startdate={YYYY-MM-DD}&enddate={YYYY-MM-DD}&Lfunds=1&InvFunds=1
+```
+- Used to calculate day change (`d`, `dp`) by comparing current price to the previous trading day
+- The edge function fetches the last 7 days and picks the most recent date that isn't today
+- If this endpoint is unavailable, `d` and `dp` default to `0`
+
+### Client
+Located at `src/lib/tsp.js`. `tspGetAllQuotes()` invokes the edge function and returns the full quotes map.
+
+### Caching
+React Query caches TSP quotes for **4 hours** (`staleTime: 4 * 60 * 60 * 1000`) with no window-focus refetch. TSP fund prices update once daily after market close, so more frequent fetching is unnecessary.
+
+### Rate Limits
+No documented rate limits on `api.dailytsp.com`. The edge function is invoked at most once per 4 hours per browser session (React Query cache), so usage is minimal.
+
+---
+
 ## Supabase Edge Functions
 
 ### Recipe URL Import
@@ -215,5 +255,7 @@ The MCP server does not use the frontend's Supabase client (`src/lib/supabase.js
 | API-Football | 100 requests/day | Cache aggressively — 10 min stale time |
 | Finnhub | 60 requests/minute | 1 min stale time, refetch on window focus |
 | Alpha Vantage | 25 requests/day | Fallback only — 4 hr stale time, no window-focus refetch |
+| dailytsp.com | No documented limit | Proxied through edge function — 4 hr stale time |
+| tsp.gov CSV | No documented limit | Used for previous-day prices only, one call per edge function invocation |
 | Supabase | Generous free tier | No concerns for personal use |
 | Cloudflare Workers | 100,000 requests/day | Free tier — no concerns for personal assistant use |
