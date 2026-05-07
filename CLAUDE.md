@@ -74,4 +74,5 @@ See `docs/MCP.md` for the Cloudflare Workers MCP server — tools exposed, auth 
 - Never store API keys in frontend code — use environment variables
 - Never skip the privacy mode check when rendering stock values
 - Never add Google Calendar sync — that is planned for a future phase
-- Never expose the MCP auth secret or Supabase service-role key in the `mcp/` source code — both must live in Cloudflare environment variables only
+- Never expose `MCP_AUTH_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, or `USER_ID` in `mcp/` source code — all must live in Cloudflare environment variables only
+- When adding a new tab, always add a corresponding tool file in `mcp/src/tools/` and register it in `mcp/src/index.ts`, then redeploy the Worker
