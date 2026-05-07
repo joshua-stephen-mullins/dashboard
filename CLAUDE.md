@@ -11,7 +11,7 @@ Dashboard is a personal dashboard SPA built for a single user. It aggregates eve
 - **Data Fetching**: React Query + Context API
 - **Backend**: Supabase (database, auth, file storage)
 - **Soccer Data**: API-Football
-- **Stock Data**: Finnhub
+- **Stock Data**: Finnhub (primary), Alpha Vantage (403 fallback for mutual funds), Supabase Edge Function `tsp-quote` (TSP funds)
 - **Recipe URL Parsing**: Supabase Edge Functions
 - **MCP Server**: Cloudflare Workers + MCP SDK (assistant access to dashboard data)
 

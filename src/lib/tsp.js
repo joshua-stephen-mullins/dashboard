@@ -24,7 +24,6 @@ export const TSP_FUND_NAMES = {
 // Returns all TSP fund quotes as { 'TSP-C': { c, d, dp }, ... }
 export async function tspGetAllQuotes() {
   const { data, error } = await supabase.functions.invoke('tsp-quote')
-  console.log('[tsp-quote] invoke result:', { data, error })
   if (error) throw new Error(error.message ?? 'TSP quote fetch failed')
   if (data?.error) throw new Error(data.error)
   return data

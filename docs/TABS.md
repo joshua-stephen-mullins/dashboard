@@ -115,15 +115,34 @@ Privacy mode state is stored in React local state (not persisted — resets on p
 
 ### Data Flow
 1. On tab load, fetch `stocks_holdings` from Supabase
-2. For each holding, call Finnhub `/quote?symbol={ticker}` for live price
-3. Calculate total value, P/L, day change on the frontend
-4. Never store live prices or P/L in the database
+2. Tickers are routed to one of three pricing sources (see `useStockQuotes`):
+   - **`TSP-` tickers** → single `tsp-quote` Supabase edge function call (covers all TSP funds at once, 4hr stale)
+   - **All other tickers** → Finnhub `/quote` (1min stale, refetch on window focus)
+   - **Finnhub 403** → Alpha Vantage `GLOBAL_QUOTE` fallback (4hr stale, no window-focus refetch)
+3. All sources normalise to `{ c, d, dp }` (current price, day change $, day change %)
+4. Calculate total value, P/L, day change on the frontend
+5. Never store live prices or P/L in the database
+
+### TSP Ticker Convention
+TSP (Thrift Savings Plan) funds use a custom `TSP-` prefix ticker format stored in `stocks_holdings`:
+| Ticker | Fund |
+|---|---|
+| `TSP-G` | G Fund (Government Securities) |
+| `TSP-F` | F Fund (Fixed Income Index) |
+| `TSP-C` | C Fund (Common Stock Index) |
+| `TSP-S` | S Fund (Small Cap Stock Index) |
+| `TSP-I` | I Fund (International Stock Index) |
+| `TSP-LINCOME` | L Income Fund |
+| `TSP-L2025` … `TSP-L2075` | L Lifecycle Funds |
+
+`shares` stores the actual TSP unit count. `avg_cost` stores the cost basis per unit (opening balance ÷ units).
 
 ### Add Holding Flow
 1. User enters ticker symbol
-2. App calls Finnhub `/stock/profile2` to auto-fill company name
-3. User enters number of shares and average cost
-4. Saved to `stocks_holdings` in Supabase
+2. **If `TSP-` prefix**: company name is resolved locally from `TSP_FUND_NAMES` in `src/lib/tsp.js` — no API call
+3. **Otherwise**: app calls Finnhub `/stock/profile2` to auto-fill company name; falls back to Alpha Vantage `OVERVIEW` on 403
+4. User enters number of shares and average cost
+5. Saved to `stocks_holdings` in Supabase
 
 ---
 
