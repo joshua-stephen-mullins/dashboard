@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Modal from '../../../../components/Modal/Modal'
 import { finnhubGet } from '../../../../lib/finnhub'
 import { avGetProfile } from '../../../../lib/alphaVantage'
+import { TSP_FUND_NAMES } from '../../../../lib/tsp'
 import styles from './HoldingFormModal.module.css'
 
 function buildInitialState(holding) {
@@ -35,6 +36,14 @@ export default function HoldingFormModal({ holding, onSave, onClose }) {
     setLooking(true)
     setLookupError(null)
     try {
+      // TSP- tickers are resolved locally — no API call needed
+      if (ticker.startsWith('TSP-')) {
+        const name = TSP_FUND_NAMES[ticker]
+        if (!name) throw new Error(`Unknown TSP fund "${ticker}". Valid examples: TSP-C, TSP-L2050, TSP-LINCOME`)
+        setForm((f) => ({ ...f, ticker, company_name: name }))
+        return
+      }
+
       let name
       try {
         const data = await finnhubGet('stock/profile2', { symbol: ticker })
