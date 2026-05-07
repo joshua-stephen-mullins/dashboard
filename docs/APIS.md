@@ -237,6 +237,43 @@ Used to parse recipe data from a URL the user provides.
 - The edge function fetches the page server-side, parses structured recipe data (JSON-LD schema if available, otherwise best-effort HTML parsing), and returns a structured recipe object
 - The user can review and edit the parsed data before saving
 
+### Book ISBN Lookup
+Used to look up book metadata by ISBN when adding a book to the library.
+
+- **Function name**: `lookup-book`
+- **Trigger**: User enters an ISBN in the books import flow and clicks "Look up"
+- **Input**: `{ isbn: string }`
+- **Output**: `{ title, author, cover_url, page_count, source_url }`
+- The edge function fetches from Open Library's Books API server-side, parses the response, and returns a structured book object
+- The user can review and edit the parsed data before saving
+- Also called by the MCP server's `lookup_book_by_isbn` tool
+
+#### Open Library Endpoint
+```
+GET https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data
+```
+
+- Public endpoint, no API key required
+- Returns title, authors array, cover image URLs (small/medium/large), page count, and the Open Library work URL
+- The edge function picks the `medium` cover URL by default and falls back to `small` if `medium` is unavailable
+
+#### Response Mapping
+| Output Field | Source |
+|---|---|
+| `title` | `title` |
+| `author` | First entry of `authors[].name`, comma-joined if multiple |
+| `cover_url` | `cover.medium` (fallback to `cover.small`, null if neither) |
+| `page_count` | `number_of_pages` (null if unavailable) |
+| `source_url` | `url` (the Open Library work URL) |
+
+#### Error Handling
+- If the ISBN is not found in Open Library → return `{ error: 'not_found' }` with HTTP 404
+- If the Open Library response is malformed → return `{ error: 'parse_failed' }` with HTTP 502
+- The frontend should show a "Couldn't find that ISBN — add manually instead" message and let the user fill in the form by hand
+
+#### Caching
+Open Library responses are not cached at the edge function layer. Each lookup is a single user-initiated action with no rate-limit concerns at personal-use scale.
+
 ---
 
 ## MCP Server — Supabase Access
@@ -257,5 +294,6 @@ The MCP server does not use the frontend's Supabase client (`src/lib/supabase.js
 | Alpha Vantage | 25 requests/day | Fallback only — 4 hr stale time, no window-focus refetch |
 | dailytsp.com | No documented limit | Proxied through edge function — 4 hr stale time |
 | tsp.gov CSV | No documented limit | Used for previous-day prices only, one call per edge function invocation |
+| Open Library | No documented limit | Used only for ISBN lookups via `lookup-book` edge function — typically a handful of calls per day |
 | Supabase | Generous free tier | No concerns for personal use |
 | Cloudflare Workers | 100,000 requests/day | Free tier — no concerns for personal assistant use |

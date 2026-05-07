@@ -185,3 +185,198 @@ A personal event calendar for tracking deadlines, appointments, and anything els
 - Google Calendar sync — planned for a future phase
 - Week or day view
 - Recurring events
+
+---
+
+## 📚 Books Tab
+
+### Purpose
+A personal library catalog. Track books the user owns, what they're currently reading, what they've finished, and what's been lent out.
+
+### Features
+- Browse all books in a cover-first grid view
+- Toggle to a denser sortable table view
+- Search books by title or author
+- Filter books by genre, status, or rating
+- Add a book manually (form)
+- Import a book by ISBN (calls Supabase Edge Function `lookup-book`)
+- Edit an existing book
+- Delete a book
+- Track reading status: owned, reading, read, dnf, lent out
+
+### Book Form Fields
+- Title (required)
+- Author (required)
+- ISBN (optional — used for lookup and dedup)
+- Cover image — auto-filled from ISBN lookup, or paste URL, or upload file
+- Genre — free-form, comma separated (e.g. "fantasy, epic, series")
+- Page count (optional)
+- Status (required) — one of: `owned`, `reading`, `read`, `dnf`, `lent_out`
+- Rating (optional, 1–5)
+- Date started (optional, auto-filled when status changes to `reading`)
+- Date finished (optional, auto-filled when status changes to `read`)
+- Lent to (optional, only relevant when status is `lent_out`)
+- Notes (optional)
+- Source URL (optional, auto-filled if imported)
+
+### Import Flow (ISBN Lookup)
+1. User enters an ISBN in the import field and clicks "Look up"
+2. Frontend calls Supabase Edge Function `lookup-book` with the ISBN
+3. Edge function returns `{ title, author, cover_url, page_count }` from Open Library
+4. User sees a pre-filled form they can review and edit
+5. User saves — book stored in Supabase
+
+### Image Handling
+Same priority order as recipes:
+- If the user uploads a file → upload to Supabase Storage bucket `book-covers` → store URL in `cover_url`
+- If the user pastes a URL (or it's auto-filled from Open Library) → store directly in `cover_url`
+- If both → uploaded file takes priority
+- If neither → `cover_url` is null, card shows a placeholder
+
+### Grid View (default)
+Each card shows:
+- Cover image (or placeholder if none)
+- Title
+- Author
+- Status badge (color-coded)
+- Rating (if set, as star count)
+
+### Table View
+Sortable columns:
+- Title
+- Author
+- Genre
+- Status
+- Rating
+- Date finished
+- Page count
+
+User can toggle between grid and table view via a control at the top of the tab. View preference is local component state, not persisted.
+
+### Status Workflow
+- When status changes from anything to `reading` → `date_started` auto-fills to today (only if currently null)
+- When status changes from anything to `read` → `date_finished` auto-fills to today (only if currently null)
+- When status changes away from `lent_out` → `lent_to` is cleared
+
+### What Is NOT in Scope
+- Reading progress tracking (current page)
+- Reading streaks or analytics
+- Public/shared lists
+- Goodreads sync
+
+---
+
+## 👕 Clothes Tab
+
+### Purpose
+A visual wardrobe inventory. Track what the user owns, what gets worn most, and what sits unused.
+
+### Features
+- Browse all clothing items in a photo grid
+- Filter by category (top, bottom, outerwear, shoes, accessory, other)
+- Filter by color
+- Filter by season
+- Filter by status (active, archived, donated, needs repair)
+- Search by name
+- Add an item (photo required)
+- Edit an item
+- Delete an item
+- **Wear tracking** — tap an item to log a wear (increments `wear_count`, updates `last_worn`)
+- View "least worn" and "most worn" sorts
+
+### Clothing Form Fields
+- Name (required) — user-defined label e.g. "navy oxford shirt"
+- Category (required) — one of: `top`, `bottom`, `outerwear`, `shoes`, `accessory`, `other`
+- Subcategory (optional, free text) — e.g. "t-shirt", "jeans", "sneakers"
+- Color (required) — primary color for filtering
+- Brand (optional)
+- Size (optional)
+- Season (optional, multi-select) — `spring`, `summer`, `fall`, `winter`
+- Image (required) — file upload
+- Status (required) — one of: `active`, `archived`, `donated`, `needs_repair`
+- Date acquired (optional)
+- Notes (optional)
+
+### Image Handling
+Photo is **required** for clothing items — the entire UX assumes visual recognition.
+- File upload → Supabase Storage bucket `clothes-images` → URL stored in `image_url`
+- Client-side resize before upload: max 800px on longest dimension, 80% JPEG quality, to keep storage usage manageable
+
+### Card View
+Each card shows:
+- Photo (large, the main visual element)
+- Name (small label below)
+- Category badge
+- Wear count (subtle, e.g. "worn 12×")
+- Tap-to-log-wear button (or tap anywhere on the card to log wear from the grid)
+
+### Sort Options
+- Recently added (default)
+- Most worn
+- Least worn
+- Recently worn
+- Never worn
+
+### Wear Tracking Behavior
+- A "Log wear" action on the card and detail modal
+- On log: `wear_count` increments by 1, `last_worn` is set to today
+- No undo from the UI (intentionally simple — edit the item directly if needed)
+- Wear count and last worn are visible on the card and in the detail view
+
+### What Is NOT in Scope
+- Outfit building / saved combinations
+- Calendar of what was worn when
+- Weather-based recommendations
+- Auto-tagging via image analysis
+
+---
+
+## ⚔️ Miniatures Tab
+
+### Purpose
+A photo catalog of the user's D&D miniature collection. Track what they own, where it's stored, and what it's used for.
+
+### Features
+- Browse all miniatures in a photo grid
+- Filter by faction
+- Filter by storage location
+- Search by name
+- Add a miniature (manual entry)
+- Edit a miniature
+- Delete a miniature
+
+### Miniature Form Fields
+- Name (required) — e.g. "Mind Flayer", "Drizzt Do'Urden"
+- Faction (optional, free text with autocomplete from existing values) — e.g. "Cult of the Dragon", "Drow", "Player Character"
+- Unit type (optional, free text) — e.g. "monster", "character", "NPC"
+- Quantity (default 1) — for cases with multiples of the same mini
+- Image — file upload OR URL paste
+- Storage location (optional, free text with autocomplete from existing values) — e.g. "Foam case A", "Shelf 2", "Box 3"
+- Date acquired (optional)
+- Notes (optional)
+
+### Image Handling
+Same priority order as recipes:
+- If the user uploads a file → upload to Supabase Storage bucket `miniature-images` → store URL in `image_url`
+- If the user pastes a URL → store directly in `image_url`
+- If both → uploaded file takes priority
+- If neither → `image_url` is null, card shows a placeholder
+
+### Card View
+Each card shows:
+- Photo (or placeholder if none)
+- Name
+- Faction (if set)
+- Storage location (if set, subtle)
+- Quantity badge (only displayed if quantity > 1)
+
+### Filter Behavior
+- Faction filter dropdown is populated from distinct values currently in the user's collection
+- Storage location filter dropdown is populated the same way
+- Both filters update reactively as the user adds/edits miniatures
+
+### What Is NOT in Scope
+- Painted/unpainted status tracking
+- Painting progress workflows
+- Color scheme or paint recipe notes
+- Game system field (D&D only)

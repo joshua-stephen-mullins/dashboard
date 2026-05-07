@@ -64,6 +64,35 @@ The server implements a minimal OAuth 2.0 server so claude.ai can authenticate a
 | `update_event` | Update an existing event by ID |
 | `delete_event` | Delete an event by ID |
 
+### Books
+| Tool | Description |
+|---|---|
+| `list_books` | List all books (title, author, status, rating, genre) |
+| `get_book` | Get full details of a book by ID |
+| `add_book` | Add a new book manually |
+| `lookup_book_by_isbn` | Look up a book by ISBN via the `lookup-book` edge function and add it to the library |
+| `update_book` | Update a book by ID — only provided fields are changed (commonly used to change status) |
+| `delete_book` | Delete a book by ID |
+
+### Clothes
+| Tool | Description |
+|---|---|
+| `list_clothes` | List all clothing items (name, category, color, status, wear count) |
+| `get_clothing_item` | Get full details of a clothing item by ID |
+| `add_clothing_item` | Add a new clothing item |
+| `update_clothing_item` | Update a clothing item by ID |
+| `log_wear` | Log a wear for a clothing item — increments `wear_count` and sets `last_worn` to today |
+| `delete_clothing_item` | Delete a clothing item by ID |
+
+### Miniatures
+| Tool | Description |
+|---|---|
+| `list_miniatures` | List all miniatures (name, faction, storage location, quantity) |
+| `get_miniature` | Get full details of a miniature by ID |
+| `add_miniature` | Add a new miniature |
+| `update_miniature` | Update a miniature by ID |
+| `delete_miniature` | Delete a miniature by ID |
+
 ---
 
 ## Adding Tools for a New Tab
@@ -74,7 +103,9 @@ When a new tab is added to the dashboard, add its tools to the MCP server:
 2. Import and call it in `mcp/src/index.ts` alongside the existing tools
 3. Deploy: `cd mcp && npx wrangler deploy`
 
-Claude.ai picks up the new tools automatically on the next conversation — no reconfiguration needed.
+For collection-style tabs (Recipes, Books, Clothes, Miniatures) use `mcp/src/tools/recipes.ts` as the structural reference — it has the closest data shape (manual entry + URL import + image handling). Tools that wrap edge functions (like `lookup_book_by_isbn` calling `lookup-book`) should call the same edge function the frontend uses, never duplicating the logic in the Worker.
+
+Always run `npm run typecheck` from `mcp/` before deploying. Claude.ai picks up the new tools automatically on the next conversation — no reconfiguration needed.
 
 ---
 

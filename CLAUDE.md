@@ -1,7 +1,7 @@
 # CLAUDE.md — Dashboard Project Instructions
 
 ## What This App Is
-Dashboard is a personal dashboard SPA built for a single user. It aggregates everything the user cares about into one place: soccer fixtures, recipes, a stock portfolio, and a calendar. It is private, login-protected, and designed to be easily extended with new tabs over time.
+Dashboard is a personal dashboard SPA built for a single user. It aggregates everything the user cares about into one place: soccer fixtures, recipes, a stock portfolio, a calendar, a personal library, a wardrobe inventory, and a D&D miniature collection. It is private, login-protected, and designed to be easily extended with new tabs over time.
 
 ---
 
@@ -13,6 +13,7 @@ Dashboard is a personal dashboard SPA built for a single user. It aggregates eve
 - **Soccer Data**: API-Football
 - **Stock Data**: Finnhub (primary), Alpha Vantage (403 fallback for mutual funds), Supabase Edge Function `tsp-quote` (TSP funds)
 - **Recipe URL Parsing**: Supabase Edge Functions
+- **Book ISBN Lookup**: Supabase Edge Function `lookup-book` (Open Library)
 - **MCP Server**: Cloudflare Workers + MCP SDK (assistant access to dashboard data)
 
 ---
@@ -24,6 +25,18 @@ Dashboard is a personal dashboard SPA built for a single user. It aggregates eve
 - **No public signup.** There is only one user. The app has a login page but no registration flow. The account is created directly in Supabase dashboard.
 - **Never commit `.env`.** All API keys and secrets live in `.env` locally and are set as environment variables in the deployment platform.
 - **Privacy mode on Stocks.** The stocks tab has a toggle that hides all financial values. Always respect this state when rendering any monetary or share count data.
+
+### Collection Tabs
+The following tabs share a common structural pattern and should be treated consistently when adding new ones:
+
+**Collection tabs** (Recipes, Books, Clothes, Miniatures): photo-based catalogs of personally owned items. They share these conventions:
+
+- Image upload follows the recipes pattern: file upload OR URL paste, with file upload taking priority. The Clothes tab is an exception — file upload only, no URL paste, since photos are user-taken.
+- Each collection tab gets its own Supabase Storage bucket named `<collection>-images` (or `book-covers` for books).
+- Each collection tab gets its own MCP tool file at `mcp/src/tools/<tabname>.ts` with at minimum: list, get, add, update, delete tools.
+- Filter dropdowns populated from existing data (e.g. faction, storage location) update reactively as the user adds or edits items.
+
+When adding a new collection tab in the future, follow this pattern. The Recipes tab is the canonical reference for image handling; the Books tab is the canonical reference for tabs with both a grid and a table view.
 
 ---
 
@@ -61,6 +74,9 @@ See `docs/MCP.md` for the Cloudflare Workers MCP server — tools exposed, auth 
 - [ ] Recipes tab
 - [ ] Stocks tab
 - [ ] Calendar tab
+- [ ] Books tab
+- [ ] Clothes tab
+- [ ] Miniatures tab
 - [ ] Deployment
 - [ ] MCP server (Cloudflare Workers)
 
@@ -76,3 +92,7 @@ See `docs/MCP.md` for the Cloudflare Workers MCP server — tools exposed, auth 
 - Never add Google Calendar sync — that is planned for a future phase
 - Never expose `MCP_AUTH_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, or `USER_ID` in `mcp/` source code — all must live in Cloudflare environment variables only
 - When adding a new tab, always add a corresponding tool file in `mcp/src/tools/` and register it in `mcp/src/index.ts`, then redeploy the Worker
+- Never skip the wear-tracking update on the Clothes tab — when "log wear" is invoked, both `wear_count` and `last_worn` must be updated together
+- Never store live external image URLs (Open Library covers) without persisting them — once a book is added, the `cover_url` is the user's record and should not be re-fetched on each render
+- Never upload clothing images without client-side resizing — the 800px max dimension / 80% JPEG quality rule keeps Supabase Storage usage manageable
+- Never query Open Library directly from frontend code — always go through the `lookup-book` edge function
