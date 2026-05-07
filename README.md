@@ -27,8 +27,9 @@ A private, single-user personal dashboard for tracking soccer fixtures, stocks, 
 | Soccer Data | API-Football |
 | Stock Prices | Finnhub |
 | Recipe Parsing | Supabase Edge Functions |
+| AI Assistant | Cloudflare Workers + MCP SDK |
 | Testing | Vitest + React Testing Library |
-| Deployment | Vercel |
+| Deployment | Vercel (frontend) + Cloudflare Workers (MCP) |
 
 ---
 
@@ -110,12 +111,13 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full folder structure
 | [`docs/STYLING.md`](docs/STYLING.md) | CSS Modules conventions and design tokens |
 | [`docs/TESTING.md`](docs/TESTING.md) | Testing setup and guidelines |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Vercel deployment and custom domain setup |
+| [`docs/MCP.md`](docs/MCP.md) | MCP server — tools, auth, deployment, Claude integration |
 
 ---
 
 ## Deployment
 
-Deployed on Vercel with a custom domain via Cloudflare. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the full setup guide.
+Frontend deployed on Vercel with a custom domain via Cloudflare. MCP server deployed as a Cloudflare Worker. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the full setup guide.
 
 ---
 

@@ -135,9 +135,44 @@ The stocks tab has the most logic-heavy code and the privacy mode feature which 
 
 ---
 
+## MCP Server
+
+The MCP server (`mcp/`) is a thin layer of Supabase CRUD wrappers. Formal unit tests add little value here — the tools contain almost no logic, and mocking Supabase would test nothing meaningful. Manual testing via the MCP protocol is the appropriate verification strategy.
+
+### Before deploying MCP changes
+
+Always run the TypeScript compiler from the `mcp/` directory before deploying:
+
+```bash
+cd mcp && npm run typecheck
+```
+
+This catches broken tool signatures, missing fields, and type errors introduced when adding or modifying tools.
+
+### Manual smoke test
+
+After deploying, verify the server is responding:
+
+```bash
+curl -s -X POST https://dashboard-mcp.<your-subdomain>.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
+```
+
+Expected response: `{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"dashboard","version":"1.0.0"}}}`
+
+### Adding tools for a new tab
+
+When adding a new tool file, verify:
+- `npm run typecheck` passes with no errors
+- The tool appears in the claude.ai connector tool list after deploying (no reconfiguration needed)
+
+---
+
 ## What NOT to Test
 - Supabase queries directly — mock Supabase in tests, don't hit the real database
 - Finnhub or API-Football API calls directly — mock the API clients
+- MCP tool implementations — these are verified manually and by TypeScript
 - CSS and visual styling
 - Third party library internals
 
