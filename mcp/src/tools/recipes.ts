@@ -86,6 +86,42 @@ export function registerRecipeTools(server: McpServer, supabase: SupabaseClient,
   );
 
   server.tool(
+    "update_recipe",
+    "Update fields on an existing recipe by its ID — all fields except id are optional",
+    {
+      id: z.string().uuid(),
+      name: z.string().optional(),
+      ingredients: z.unknown().optional(),
+      instructions: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      servings: z.number().int().positive().optional(),
+      cook_time: z.string().optional(),
+      source_url: z.string().url().optional().nullable(),
+      image_url: z.string().url().optional().nullable(),
+    },
+    async ({ id, ...fields }) => {
+      const updates = Object.fromEntries(
+        Object.entries(fields).filter(([, v]) => v !== undefined)
+      );
+
+      if (Object.keys(updates).length === 0) {
+        return err("No fields provided to update.");
+      }
+
+      const { data, error } = await supabase
+        .from("recipes")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", env.USER_ID)
+        .select("id, name")
+        .single();
+
+      if (error) return err(error.message);
+      return ok(`Updated "${data.name}" (id: ${data.id})`);
+    }
+  );
+
+  server.tool(
     "delete_recipe",
     "Delete a recipe by its ID",
     { id: z.string().uuid() },
