@@ -112,7 +112,7 @@ Stores the user's personal library catalog.
 | cover_url | text | Nullable — Supabase Storage URL or external URL (e.g. Open Library) |
 | genre | text[] | Array of genre/tag strings |
 | page_count | integer | Nullable |
-| status | text | One of: `owned`, `reading`, `read`, `dnf`, `lent_out` |
+| status | text | One of: `unread`, `reading`, `read`, `dnf`, `lent_out` |
 | rating | integer | Nullable — 1 to 5 |
 | date_started | date | Nullable — auto-filled when status changes to `reading` |
 | date_finished | date | Nullable — auto-filled when status changes to `read` |

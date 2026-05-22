@@ -10,6 +10,7 @@ import RecipesTab from './tabs/recipes/index'
 import CookingMode from './tabs/recipes/CookingMode'
 import StocksTab from './tabs/stocks/index'
 import CalendarTab from './tabs/calendar/index'
+import BooksTab from './tabs/books/index'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +36,7 @@ export default function App() {
               <Route path="/recipes" element={<ProtectedRoute><RecipesTab /></ProtectedRoute>} />
               <Route path="/stocks" element={<ProtectedRoute><StocksTab /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><CalendarTab /></ProtectedRoute>} />
+              <Route path="/books" element={<ProtectedRoute><BooksTab /></ProtectedRoute>} />
             </Route>
           </Routes>
         </BrowserRouter>
