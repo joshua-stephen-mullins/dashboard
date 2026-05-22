@@ -202,7 +202,7 @@ A personal library catalog. Track books the user owns, what they're currently re
 - Import a book by ISBN (calls Supabase Edge Function `lookup-book`)
 - Edit an existing book
 - Delete a book
-- Track reading status: owned, reading, read, dnf, lent out
+- Track reading status: unread, reading, read, dnf, lent out
 
 ### Book Form Fields
 - Title (required)
@@ -211,7 +211,7 @@ A personal library catalog. Track books the user owns, what they're currently re
 - Cover image — auto-filled from ISBN lookup, or paste URL, or upload file
 - Genre — free-form, comma separated (e.g. "fantasy, epic, series")
 - Page count (optional)
-- Status (required) — one of: `owned`, `reading`, `read`, `dnf`, `lent_out`
+- Status (required) — one of: `unread`, `reading`, `read`, `dnf`, `lent_out`
 - Rating (optional, 1–5)
 - Date started (optional, auto-filled when status changes to `reading`)
 - Date finished (optional, auto-filled when status changes to `read`)

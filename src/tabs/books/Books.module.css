@@ -1,0 +1,210 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.titleGroup {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.title {
+  font-family: var(--font-sans);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-3);
+}
+
+.addBtn {
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: var(--space-2) var(--space-4);
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.addBtn:hover {
+  opacity: 0.85;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.controlsRow {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-4);
+  flex: 1;
+  min-width: 180px;
+  max-width: 360px;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.filterSelect {
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  transition: border-color 0.15s;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.viewToggle {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-left: auto;
+}
+
+.viewBtn {
+  align-items: center;
+  background: var(--color-bg-2);
+  border: none;
+  color: var(--color-text-3);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  transition: background 0.15s, color 0.15s;
+}
+
+.viewBtn:hover {
+  background: var(--color-bg-3);
+  color: var(--color-text-2);
+}
+
+.viewBtnActive {
+  background: var(--color-bg-3);
+  color: var(--color-accent);
+}
+
+.genreFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.genreFilter {
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-2);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 3px var(--space-3);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.genreFilter:hover {
+  border-color: var(--color-border-2);
+  color: var(--color-text);
+}
+
+.genreFilter.active {
+  background: rgba(79, 142, 247, 0.15);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-5);
+}
+
+.empty {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-10) 0;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 40px;
+}
+
+.emptyText {
+  color: var(--color-text-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  margin: 0;
+}
+
+.emptySubtext {
+  color: var(--color-text-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.loadingRow {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+.skeleton {
+  animation: pulse 1.5s ease-in-out infinite;
+  aspect-ratio: 2 / 3;
+  background: var(--color-bg-2);
+  border-radius: var(--radius-lg);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
