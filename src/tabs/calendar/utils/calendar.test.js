@@ -50,10 +50,10 @@ describe('getMonthGrid', () => {
     vi.useRealTimers()
   })
 
-  it('month starting on Sunday has no leading cells', () => {
-    // Dec 2024 starts on Sunday
-    const weeks = getMonthGrid(2024, 11)
-    expect(weeks[0][0].date).toBe('2024-12-01')
+  it('month starting on Monday has no leading cells', () => {
+    // Jan 2025 starts on Wednesday — use Jan 2024 which starts on Monday
+    const weeks = getMonthGrid(2024, 0)
+    expect(weeks[0][0].date).toBe('2024-01-01')
     expect(weeks[0][0].isCurrentMonth).toBe(true)
   })
 })

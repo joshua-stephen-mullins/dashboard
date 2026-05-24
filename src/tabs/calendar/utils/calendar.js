@@ -1,4 +1,4 @@
-export const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+export const DOW_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 export const EVENT_COLORS = ['blue', 'green', 'amber', 'red', 'teal', 'purple', 'orange', 'pink']
 
@@ -22,7 +22,7 @@ export function getMonthGrid(year, month) {
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
   const today = todayStr()
-  const startDow = firstDay.getDay()
+  const startDow = (firstDay.getDay() + 6) % 7
 
   const cells = []
 
