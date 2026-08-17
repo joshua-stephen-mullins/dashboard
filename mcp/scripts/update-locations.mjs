@@ -1,10 +1,14 @@
-const MCP_URL = "http://localhost:8787/mcp";
-const AUTH = "Bearer c46fdc6fc068e3c681a9bbe86ad91e64b8c33611990afe14e2aba7e5c8cc901b";
+const SECRET = process.env.MCP_AUTH_SECRET;
+if (!SECRET) {
+  console.error("MCP_AUTH_SECRET env var is required");
+  process.exit(1);
+}
+const MCP_URL = `http://localhost:8787/mcp/${SECRET}`;
 
 async function call(method, params) {
   const res = await fetch(MCP_URL, {
     method: "POST",
-    headers: { Authorization: AUTH, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: Date.now() + Math.random(), method, params }),
   });
   const json = await res.json();
@@ -23,7 +27,7 @@ let ok = 0;
 for (const e of academic) {
   await fetch(MCP_URL, {
     method: "POST",
-    headers: { Authorization: AUTH, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       jsonrpc: "2.0",
       id: Date.now() + Math.random(),

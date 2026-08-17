@@ -10,22 +10,18 @@ A [Model Context Protocol](https://modelcontextprotocol.io) server hosted on Clo
 
 - **Runtime**: Cloudflare Workers (always on, free tier, 100k requests/day)
 - **Transport**: Streamable HTTP (stateless, serverless-friendly)
-- **Auth**: OAuth 2.0 with dynamic client registration (used by claude.ai). Bearer token accepted on Claude Code via header or `?token=` query param.
+- **Auth**: Secret-in-path. The only served route is `/mcp/<MCP_AUTH_SECRET>`; every other path returns 404. No OAuth, no Bearer tokens — the URL itself is the credential, so treat the full URL as a secret.
 - **Database access**: Supabase service-role key (bypasses RLS — stored as a Cloudflare secret, never in source code)
 - **Location in repo**: `mcp/` — a fully independent deployable, no shared code with the React app
 
-### OAuth Endpoints
-
-The server implements a minimal OAuth 2.0 server so claude.ai can authenticate automatically:
+### Endpoints
 
 | Endpoint | Purpose |
 |---|---|
-| `GET /.well-known/oauth-authorization-server` | OAuth discovery metadata |
-| `GET /.well-known/oauth-protected-resource` | Protected resource metadata |
-| `POST /register` | Dynamic client registration (RFC 7591) |
-| `GET /authorize` | Authorization endpoint — auto-approves for this single-user server |
-| `POST /token` | Token endpoint — issues `MCP_AUTH_SECRET` as the access token |
-| `POST /mcp` | MCP protocol endpoint |
+| `POST /mcp/<MCP_AUTH_SECRET>` | MCP protocol endpoint (JSON-RPC: `initialize`, `tools/list`, `tools/call`) |
+| anything else | 404 |
+
+If `MCP_AUTH_SECRET` is ever exposed (committed, pasted publicly), rotate it: generate a new one, `npx wrangler secret put MCP_AUTH_SECRET`, update `.dev.vars`, redeploy, and re-add the claude.ai connector with the new URL.
 
 ---
 
@@ -117,7 +113,7 @@ All secrets are stored in Cloudflare Workers → your worker → Settings → Va
 |---|---|
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service-role key — full DB access, bypasses RLS |
-| `MCP_AUTH_SECRET` | Strong random string — used as the OAuth access token and for Claude Code bearer auth |
+| `MCP_AUTH_SECRET` | Strong random string — the path segment that gates the MCP endpoint (`/mcp/<secret>`) |
 | `USER_ID` | Supabase auth UUID of the single user (Authentication → Users in Supabase dashboard) |
 | `FOOTBALL_API_KEY` | API-Football key for fetching live fixtures |
 
@@ -169,18 +165,17 @@ Independent of the frontend — no need to redeploy Vercel when the MCP server c
 
 ## Connecting to Claude.ai (web + mobile)
 
-Requires a Claude Pro account. claude.ai handles OAuth automatically — no manual token setup needed.
+Requires a Claude Pro account. The server presents no OAuth metadata, so claude.ai connects to it as an unauthenticated server — the secret in the URL is the auth.
 
 1. Go to [claude.ai](https://claude.ai) → Settings → **Connectors**
 2. Click **Add custom connector**
-3. Enter a name (e.g. `dashboard-mcp`) and the Worker URL:
+3. Enter a name (e.g. `dashboard-mcp`) and the Worker URL **including the secret**:
    ```
-   https://dashboard-mcp.<your-subdomain>.workers.dev/mcp
+   https://dashboard-mcp.<your-subdomain>.workers.dev/mcp/<MCP_AUTH_SECRET>
    ```
-4. Leave the OAuth fields blank and click **Add**
-5. claude.ai will register via OAuth automatically and show the tool list
+4. Leave the OAuth fields blank and click **Add** — the tool list should appear
 
-The connector is available in all claude.ai conversations on web and mobile.
+The connector is available in all claude.ai conversations on web and mobile. After rotating the secret, remove the connector and re-add it with the new URL.
 
 ---
 
@@ -193,10 +188,7 @@ Add to `.claude/settings.json` in the project root:
   "mcpServers": {
     "dashboard": {
       "type": "url",
-      "url": "https://dashboard-mcp.<your-subdomain>.workers.dev/mcp",
-      "headers": {
-        "Authorization": "Bearer <MCP_AUTH_SECRET>"
-      }
+      "url": "https://dashboard-mcp.<your-subdomain>.workers.dev/mcp/<MCP_AUTH_SECRET>"
     }
   }
 }
