@@ -2,6 +2,8 @@ export const DOW_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 export const EVENT_COLORS = ['blue', 'green', 'amber', 'red', 'teal', 'purple', 'orange', 'pink']
 
+export const UNCATEGORIZED = 'uncategorized'
+
 // Must stay in sync with the CSS values in CalendarGrid.module.css
 export const BAR_HEIGHT = 20
 export const BAR_GAP = 2
@@ -127,4 +129,44 @@ export function formatEventDate(dateStr, startTime) {
   const ampm = h >= 12 ? 'PM' : 'AM'
   const hour = h % 12 || 12
   return `${datePart} · ${hour}:${m.toString().padStart(2, '0')} ${ampm}`
+}
+
+// ── Categories ──────────────────────────────────────────────
+
+export function categoriesById(categories) {
+  return new Map(categories.map((c) => [c.id, c]))
+}
+
+// A categorized event takes its category's color; uncategorized events keep
+// the color stored on the event itself.
+export function eventColor(event, byId) {
+  const category = event.category_id ? byId.get(event.category_id) : null
+  return category?.color ?? event.color
+}
+
+export function isCoursework(event, byId) {
+  if (!event.category_id) return false
+  return Boolean(byId.get(event.category_id)?.is_coursework)
+}
+
+// selected is a Set of category ids, optionally including UNCATEGORIZED.
+// An empty set means "no filter" — show everything.
+export function filterEventsByCategory(events, selected) {
+  if (!selected || selected.size === 0) return events
+  return events.filter((e) =>
+    selected.has(e.category_id ?? UNCATEGORIZED)
+  )
+}
+
+// Incomplete coursework, overdue first, then soonest due.
+export function getOpenAssignments(events, byId, count = 6) {
+  const today = todayStr()
+  return events
+    .filter((e) => !e.completed && isCoursework(e, byId))
+    .map((e) => ({ ...e, overdue: (e.end_date || e.date) < today }))
+    .sort((a, b) => {
+      if (a.overdue !== b.overdue) return a.overdue ? -1 : 1
+      return a.date.localeCompare(b.date)
+    })
+    .slice(0, count)
 }

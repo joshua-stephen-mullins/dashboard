@@ -55,10 +55,14 @@ If `MCP_AUTH_SECRET` is ever exposed (committed, pasted publicly), rotate it: ge
 ### Calendar
 | Tool | Description |
 |---|---|
-| `list_events` | List events within a date range (YYYY-MM-DD) |
-| `add_event` | Create a new event |
+| `list_events` | List events within a date range (YYYY-MM-DD), optionally filtered by `category_id` or to incomplete items only |
+| `add_event` | Create a new event (accepts `category_id`, `course`, `completed`) |
 | `update_event` | Update an existing event by ID |
 | `delete_event` | Delete an event by ID |
+| `list_event_categories` | List event categories with color and coursework flag |
+| `add_event_category` | Create a new event category |
+| `update_event_category` | Update a category by ID |
+| `delete_event_category` | Delete a category by ID — its events become uncategorized |
 
 ### Books
 | Tool | Description |

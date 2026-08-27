@@ -3,6 +3,9 @@
 ## Platform
 Supabase (hosted Postgres). All tables use UUID primary keys and include `created_at` timestamps. Row-Level Security (RLS) is enabled on every table so users can only access their own data.
 
+`supabase/schema.sql` is the full schema — paste it into the SQL Editor for a fresh project.
+Incremental changes to an existing database live in `supabase/migrations/`, newest last.
+
 ---
 
 ## Tables
@@ -93,8 +96,26 @@ Stores the user's personal calendar events.
 | start_time | time | Nullable — optional start time |
 | end_time | time | Nullable — optional end time |
 | location | text | Nullable — optional location |
-| color | text | Color key: "blue", "green", "amber", "red", "teal", "purple", "orange", "pink" |
+| color | text | Color key: "blue", "green", "amber", "red", "teal", "purple", "orange", "pink". Only used when `category_id` is null — otherwise the category's color wins |
+| category_id | uuid | Nullable — foreign key → event_categories. `on delete set null`, so deleting a category keeps its events |
+| course | text | Nullable — only meaningful for events in a coursework category (e.g. "CS 401") |
+| completed | boolean | Default false — only meaningful for events in a coursework category |
 | notes | text | Nullable — optional notes |
+| created_at | timestamp | Auto-generated |
+
+---
+
+### event_categories
+User-managed buckets for calendar events (School, Mead, Personal, …). Categories own the color; events inherit it.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | Primary key, auto-generated |
+| user_id | uuid | Foreign key → auth.users |
+| name | text | Category name — unique per user |
+| color | text | Color key, same set as `calendar_events.color` |
+| is_coursework | boolean | Default false — when true, events in this category get `course` and `completed` fields in the UI |
+| sort_order | integer | Default 0 — controls chip/dropdown order |
 | created_at | timestamp | Auto-generated |
 
 ---
@@ -205,7 +226,7 @@ CREATE POLICY "Users can delete own data" ON <table>
   FOR DELETE USING (auth.uid() = user_id);
 ```
 
-Apply these policies to `books`, `clothes`, and `miniatures` along with all existing tables.
+Apply these policies to `books`, `clothes`, `miniatures`, and `event_categories` along with all existing tables.
 
 ---
 

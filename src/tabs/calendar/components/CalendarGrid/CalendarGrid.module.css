@@ -190,6 +190,17 @@
   filter: brightness(1.1);
 }
 
+/* Completed coursework stays visible but recedes. */
+.eventBarDone {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.check {
+  margin-right: 3px;
+  font-size: 10px;
+}
+
 /* ── Event color variants ───────────────────────────────────── */
 
 .colorBlue   { background-color: var(--color-accent); }

@@ -149,42 +149,69 @@ TSP (Thrift Savings Plan) funds use a custom `TSP-` prefix ticker format stored 
 ## 📅 Calendar Tab
 
 ### Purpose
-A personal event calendar for tracking deadlines, appointments, and anything else.
+A personal event calendar for tracking deadlines, appointments, coursework, and anything else, organized into user-defined categories.
 
 ### Features
 - Monthly calendar view
-- Add events
-- Edit events
-- Delete events
+- Add / edit / delete events
 - Click a day to add an event for that date
+- User-managed categories (School, Mead, Personal, …) — see below
+- Filter the month and sidebar by category
 - Upcoming events sidebar (next 5 events from today)
+- Assignments sidebar section for open coursework, overdue first
 - Color-coded events
+
+### Categories
+Categories live in the `event_categories` table and are managed from the tab
+("Manage categories" on the filter bar). They are the organizing unit for the calendar.
+
+- Each category has a name, a color, and an `is_coursework` flag
+- A categorized event takes its **category's** color; uncategorized events keep their own
+- The filter bar shows one chip per category plus an Uncategorized chip when relevant,
+  with per-category event counts. No chips selected means "show everything";
+  selecting several chips shows the union.
+- Deleting a category keeps its events — they become uncategorized (`on delete set null`)
+
+### Coursework Categories
+When a category has `is_coursework` set, events filed under it get two extra fields
+in the event form: **Course** (e.g. "CS 401") and **Completed**.
+
+- There is no separate "due date" — the event's own date is the due date
+- Completed assignments render dimmed and struck through on the grid
+- The Assignments sidebar section lists incomplete coursework, overdue first, then
+  soonest first, with a checkbox to mark one done without opening the modal
+- Overdue is measured against `end_date` when the event spans days, otherwise `date`
 
 ### Event Fields
 - Title (required)
-- Date (required)
+- Start date (required)
+- End date (optional — if set, the event spans days)
 - Start time (optional)
-- End time (optional — if omitted, treated as same-day single event)
+- End time (optional)
+- Category (optional — defaults to Uncategorized)
+- Course (only shown for coursework categories)
+- Completed (only shown for coursework categories)
 - Location (optional)
-- Color (required — choose from: blue, green, amber, red, teal)
+- Color (only shown when uncategorized — otherwise inherited from the category)
 - Notes (optional)
 
 ### Calendar View
-- Full monthly grid
-- Days with events show a colored dot per event
+- Full monthly grid, weeks starting Monday
+- Multi-day events render as spanning bars, stacked into tracks
 - Today is visually highlighted
 - Navigate forward/backward by month
 - Clicking a day opens the add event modal pre-filled with that date
 
 ### Upcoming Events Sidebar
-- Shows next 5 events from today's date
-- Each item shows: color bar, event title, date (and time if set), location if provided
+- Assignments section (when open coursework exists): title, due date, course, done checkbox
+- Upcoming section: next 5 events from today — color bar, title, date/time, course, location
 - Clicking an event opens the edit modal
 
 ### Out of Scope (for now)
 - Google Calendar sync — planned for a future phase
 - Week or day view
 - Recurring events
+- Mead brewing batches — planned as its own tab, not calendar events
 
 ---
 

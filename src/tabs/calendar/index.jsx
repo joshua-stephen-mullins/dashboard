@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useEvents } from './hooks/useEvents'
-import { toDateStr } from './utils/calendar'
+import { useEventCategories } from './hooks/useEventCategories'
+import { toDateStr, categoriesById, filterEventsByCategory, UNCATEGORIZED } from './utils/calendar'
 import CalendarGrid from './components/CalendarGrid/CalendarGrid'
+import CategoryBar from './components/CategoryBar/CategoryBar'
+import CategoryManagerModal from './components/CategoryManagerModal/CategoryManagerModal'
 import UpcomingSidebar from './components/UpcomingSidebar/UpcomingSidebar'
 import EventFormModal from './components/EventFormModal/EventFormModal'
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal'
@@ -14,8 +17,39 @@ function currentYearMonth() {
 
 export default function CalendarTab() {
   const { data: events = [], isLoading, add, update, remove } = useEvents()
+  const { data: categories = [], add: addCategory, update: updateCategory, remove: removeCategory } =
+    useEventCategories()
 
   const [{ year, month }, setNav] = useState(currentYearMonth)
+
+  // Empty set means no filter — show every category.
+  const [selectedCategories, setSelectedCategories] = useState(() => new Set())
+  const [managerOpen, setManagerOpen] = useState(false)
+
+  const byId = useMemo(() => categoriesById(categories), [categories])
+
+  const counts = useMemo(() => {
+    const tally = {}
+    for (const event of events) {
+      const key = event.category_id ?? UNCATEGORIZED
+      tally[key] = (tally[key] ?? 0) + 1
+    }
+    return tally
+  }, [events])
+
+  const visibleEvents = useMemo(
+    () => filterEventsByCategory(events, selectedCategories),
+    [events, selectedCategories]
+  )
+
+  function toggleCategory(id) {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const [formOpen, setFormOpen] = useState(false)
   const [editEvent, setEditEvent] = useState(undefined)
@@ -66,6 +100,10 @@ export default function CalendarTab() {
     closeForm()
   }
 
+  function toggleComplete(event) {
+    return update.mutateAsync({ id: event.id, completed: !event.completed })
+  }
+
   async function confirmDelete() {
     await remove.mutateAsync(deleteId)
     setDeleteId(null)
@@ -84,6 +122,15 @@ export default function CalendarTab() {
         </button>
       </header>
 
+      <CategoryBar
+        categories={categories}
+        selected={selectedCategories}
+        counts={counts}
+        onToggle={toggleCategory}
+        onClear={() => setSelectedCategories(new Set())}
+        onManage={() => setManagerOpen(true)}
+      />
+
       <div className={styles.content}>
         {isLoading ? (
           <div className={styles.loading}>
@@ -93,7 +140,8 @@ export default function CalendarTab() {
           <CalendarGrid
             year={year}
             month={month}
-            events={events}
+            events={visibleEvents}
+            categoriesById={byId}
             onDayClick={openAdd}
             onEventClick={openEdit}
             onPrev={prevMonth}
@@ -101,16 +149,32 @@ export default function CalendarTab() {
           />
         )}
 
-        <UpcomingSidebar events={events} onEventClick={openEdit} />
+        <UpcomingSidebar
+          events={visibleEvents}
+          categoriesById={byId}
+          onEventClick={openEdit}
+          onToggleComplete={toggleComplete}
+        />
       </div>
 
       {formOpen && (
         <EventFormModal
           event={editEvent}
           prefillDate={prefillDate}
+          categories={categories}
           onSave={handleSave}
           onDelete={handleDeleteFromModal}
           onClose={closeForm}
+        />
+      )}
+
+      {managerOpen && (
+        <CategoryManagerModal
+          categories={categories}
+          onAdd={(c) => addCategory.mutateAsync(c)}
+          onUpdate={(c) => updateCategory.mutateAsync(c)}
+          onDelete={(id) => removeCategory.mutateAsync(id)}
+          onClose={() => setManagerOpen(false)}
         />
       )}
 

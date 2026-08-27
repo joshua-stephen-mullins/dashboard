@@ -1,12 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   toDateStr,
-  todayStr,
   getMonthGrid,
   formatMonthYear,
   getUpcomingEvents,
   formatEventDate,
   layoutWeekEvents,
+  categoriesById,
+  eventColor,
+  isCoursework,
+  filterEventsByCategory,
+  getOpenAssignments,
+  UNCATEGORIZED,
 } from './calendar'
 
 describe('toDateStr', () => {
@@ -194,5 +199,85 @@ describe('layoutWeekEvents', () => {
   it('reports trackCount 0 for an empty week', () => {
     const { trackCount } = layoutWeekEvents([], week)
     expect(trackCount).toBe(0)
+  })
+})
+
+describe('category helpers', () => {
+  const school = { id: 'c1', name: 'School', color: 'red', is_coursework: true }
+  const mead = { id: 'c2', name: 'Mead', color: 'amber', is_coursework: false }
+  const byId = categoriesById([school, mead])
+
+  it('takes the color from the event category', () => {
+    expect(eventColor({ category_id: 'c1', color: 'blue' }, byId)).toBe('red')
+  })
+
+  it('falls back to the event color when uncategorized', () => {
+    expect(eventColor({ category_id: null, color: 'teal' }, byId)).toBe('teal')
+  })
+
+  it('falls back to the event color when the category is missing', () => {
+    expect(eventColor({ category_id: 'gone', color: 'teal' }, byId)).toBe('teal')
+  })
+
+  it('flags coursework only for coursework categories', () => {
+    expect(isCoursework({ category_id: 'c1' }, byId)).toBe(true)
+    expect(isCoursework({ category_id: 'c2' }, byId)).toBe(false)
+    expect(isCoursework({ category_id: null }, byId)).toBe(false)
+  })
+})
+
+describe('filterEventsByCategory', () => {
+  const events = [
+    { id: '1', category_id: 'c1' },
+    { id: '2', category_id: 'c2' },
+    { id: '3', category_id: null },
+  ]
+
+  it('returns everything when nothing is selected', () => {
+    expect(filterEventsByCategory(events, new Set())).toHaveLength(3)
+  })
+
+  it('keeps only the selected categories', () => {
+    const result = filterEventsByCategory(events, new Set(['c1']))
+    expect(result.map((e) => e.id)).toEqual(['1'])
+  })
+
+  it('matches uncategorized events under the uncategorized key', () => {
+    const result = filterEventsByCategory(events, new Set([UNCATEGORIZED]))
+    expect(result.map((e) => e.id)).toEqual(['3'])
+  })
+})
+
+describe('getOpenAssignments', () => {
+  const school = { id: 'c1', name: 'School', color: 'red', is_coursework: true }
+  const byId = categoriesById([school, { id: 'c2', name: 'Mead', is_coursework: false }])
+
+  beforeEach(() => {
+    vi.setSystemTime(new Date(2024, 4, 10)) // May 10 2024
+  })
+  afterEach(() => vi.useRealTimers())
+
+  const events = [
+    { id: 'done', title: 'Done', date: '2024-05-12', category_id: 'c1', completed: true },
+    { id: 'late', title: 'Late', date: '2024-05-01', category_id: 'c1', completed: false },
+    { id: 'soon', title: 'Soon', date: '2024-05-12', category_id: 'c1', completed: false },
+    { id: 'later', title: 'Later', date: '2024-05-20', category_id: 'c1', completed: false },
+    { id: 'mead', title: 'Rack', date: '2024-05-11', category_id: 'c2', completed: false },
+  ]
+
+  it('lists only incomplete coursework, overdue first', () => {
+    const result = getOpenAssignments(events, byId)
+    expect(result.map((e) => e.id)).toEqual(['late', 'soon', 'later'])
+    expect(result[0].overdue).toBe(true)
+    expect(result[1].overdue).toBe(false)
+  })
+
+  it('uses end_date to decide whether a multi-day assignment is overdue', () => {
+    const spanning = [{ id: 'span', date: '2024-05-01', end_date: '2024-05-15', category_id: 'c1', completed: false }]
+    expect(getOpenAssignments(spanning, byId)[0].overdue).toBe(false)
+  })
+
+  it('respects the count cap', () => {
+    expect(getOpenAssignments(events, byId, 2)).toHaveLength(2)
   })
 })

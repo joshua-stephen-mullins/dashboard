@@ -1,4 +1,12 @@
-import { DOW_LABELS, getMonthGrid, formatMonthYear, layoutWeekEvents, BAR_SLOT, BAR_GAP } from '../../utils/calendar'
+import {
+  DOW_LABELS,
+  getMonthGrid,
+  formatMonthYear,
+  layoutWeekEvents,
+  eventColor,
+  BAR_SLOT,
+  BAR_GAP,
+} from '../../utils/calendar'
 import styles from './CalendarGrid.module.css'
 
 const COLOR_CLASS = {
@@ -12,7 +20,7 @@ const COLOR_CLASS = {
   pink: styles.colorPink,
 }
 
-export default function CalendarGrid({ year, month, events, onDayClick, onEventClick, onPrev, onNext }) {
+export default function CalendarGrid({ year, month, events, categoriesById, onDayClick, onEventClick, onPrev, onNext }) {
   const weeks = getMonthGrid(year, month)
 
   return (
@@ -68,15 +76,20 @@ export default function CalendarGrid({ year, month, events, onDayClick, onEventC
                   <button
                     key={`${ev.id}-${wi}`}
                     type="button"
-                    className={[styles.eventBar, COLOR_CLASS[ev.color]].filter(Boolean).join(' ')}
+                    className={[
+                      styles.eventBar,
+                      COLOR_CLASS[eventColor(ev, categoriesById)],
+                      ev.completed && styles.eventBarDone,
+                    ].filter(Boolean).join(' ')}
                     style={{
                       '--col-start': ev.colStart,
                       '--col-span': ev.colEnd - ev.colStart + 1,
                       '--track': ev.track,
                     }}
                     onClick={(e) => { e.stopPropagation(); onEventClick(ev) }}
-                    title={ev.title}
+                    title={ev.course ? `${ev.course} — ${ev.title}` : ev.title}
                   >
+                    {ev.completed && <span className={styles.check} aria-hidden="true">✓</span>}
                     {ev.title}
                   </button>
                 ))}

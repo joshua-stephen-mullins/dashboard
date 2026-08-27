@@ -96,3 +96,5 @@ See `docs/MCP.md` for the Cloudflare Workers MCP server — tools exposed, auth 
 - Never store live external image URLs (Open Library covers) without persisting them — once a book is added, the `cover_url` is the user's record and should not be re-fetched on each render
 - Never upload clothing images without client-side resizing — the 800px max dimension / 80% JPEG quality rule keeps Supabase Storage usage manageable
 - Never query Open Library directly from frontend code — always go through the `lookup-book` edge function
+- Never hardcode a calendar category — categories are user-managed rows in `event_categories`, and the coursework fields (`course`, `completed`) are driven by the category's `is_coursework` flag, never by a category's name
+- Never set a categorized event's color independently — a categorized event's color comes from its category

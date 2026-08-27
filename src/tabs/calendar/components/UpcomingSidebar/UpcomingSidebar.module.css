@@ -12,6 +12,12 @@
   }
 }
 
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .heading {
   font-family: var(--font-sans);
   font-size: var(--text-base);
@@ -95,6 +101,35 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.assignmentRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.checkbox {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.course {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overdue {
+  color: var(--color-red);
+}
+
+.titleDone {
+  text-decoration: line-through;
+  color: var(--color-text-3);
 }
 
 /* Color bar variants */

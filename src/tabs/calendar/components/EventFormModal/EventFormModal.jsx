@@ -24,6 +24,9 @@ function buildInitialState(event, prefillDate) {
       end_time: '',
       location: '',
       color: 'blue',
+      category_id: '',
+      course: '',
+      completed: false,
       notes: '',
     }
   }
@@ -35,16 +38,21 @@ function buildInitialState(event, prefillDate) {
     end_time: event.end_time ?? '',
     location: event.location ?? '',
     color: event.color,
+    category_id: event.category_id ?? '',
+    course: event.course ?? '',
+    completed: event.completed ?? false,
     notes: event.notes ?? '',
   }
 }
 
-export default function EventFormModal({ event, prefillDate, onSave, onDelete, onClose }) {
+export default function EventFormModal({ event, prefillDate, categories = [], onSave, onDelete, onClose }) {
   const [form, setForm] = useState(() => buildInitialState(event, prefillDate))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
   const isEdit = Boolean(event?.id)
+  const category = categories.find((c) => c.id === form.category_id) ?? null
+  const showCoursework = Boolean(category?.is_coursework)
 
   function setField(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -64,6 +72,9 @@ export default function EventFormModal({ event, prefillDate, onSave, onDelete, o
         end_time: form.end_time || null,
         location: form.location.trim() || null,
         color: form.color,
+        category_id: form.category_id || null,
+        course: showCoursework ? form.course.trim() || null : null,
+        completed: showCoursework ? form.completed : false,
         notes: form.notes.trim() || null,
       }
       await onSave(isEdit ? { id: event.id, ...payload } : payload)
@@ -140,6 +151,43 @@ export default function EventFormModal({ event, prefillDate, onSave, onDelete, o
         </div>
 
         <label className={styles.label}>
+          Category
+          <select
+            className={styles.select}
+            value={form.category_id}
+            onChange={(e) => setField('category_id', e.target.value)}
+          >
+            <option value="">Uncategorized</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </label>
+
+        {showCoursework && (
+          <div className={styles.row}>
+            <label className={styles.label}>
+              Course
+              <input
+                className={styles.input}
+                type="text"
+                placeholder="e.g. CS 401"
+                value={form.course}
+                onChange={(e) => setField('course', e.target.value)}
+              />
+            </label>
+            <label className={styles.checkLabel}>
+              <input
+                type="checkbox"
+                checked={form.completed}
+                onChange={(e) => setField('completed', e.target.checked)}
+              />
+              Completed
+            </label>
+          </div>
+        )}
+
+        <label className={styles.label}>
           Location
           <input
             className={styles.input}
@@ -150,25 +198,29 @@ export default function EventFormModal({ event, prefillDate, onSave, onDelete, o
           />
         </label>
 
-        <div className={styles.colorRow}>
-          <span className={styles.colorLabel}>Color</span>
-          <div className={styles.swatches}>
-            {EVENT_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className={[
-                  styles.swatch,
-                  COLOR_CLASS[c],
-                  form.color === c && styles.swatchSelected,
-                ].filter(Boolean).join(' ')}
-                onClick={() => setField('color', c)}
-                aria-label={c}
-                aria-pressed={form.color === c}
-              />
-            ))}
+        {category ? (
+          <p className={styles.hint}>Color comes from the {category.name} category.</p>
+        ) : (
+          <div className={styles.colorRow}>
+            <span className={styles.colorLabel}>Color</span>
+            <div className={styles.swatches}>
+              {EVENT_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={[
+                    styles.swatch,
+                    COLOR_CLASS[c],
+                    form.color === c && styles.swatchSelected,
+                  ].filter(Boolean).join(' ')}
+                  onClick={() => setField('color', c)}
+                  aria-label={c}
+                  aria-pressed={form.color === c}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <label className={styles.label}>
           Notes
