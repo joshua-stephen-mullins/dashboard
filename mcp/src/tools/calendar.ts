@@ -8,14 +8,15 @@ const COLOR_VALUES = ["blue", "green", "amber", "red", "teal", "purple", "orange
 export function registerCalendarTools(server: McpServer, supabase: SupabaseClient, env: Env) {
   server.tool(
     "list_events",
-    "List calendar events within a date range (ISO dates: YYYY-MM-DD), optionally filtered by category or to incomplete items only",
+    "List calendar events within a date range (ISO dates: YYYY-MM-DD), optionally filtered by category, to uncategorized events only, or to incomplete items only",
     {
       from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
       to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
       category_id: z.string().uuid().optional(),
+      only_uncategorized: z.boolean().optional(),
       only_incomplete: z.boolean().optional(),
     },
-    async ({ from, to, category_id, only_incomplete }) => {
+    async ({ from, to, category_id, only_uncategorized, only_incomplete }) => {
       let query = supabase
         .from("calendar_events")
         .select("id, title, date, end_date, start_time, end_time, location, color, category_id, course, completed, notes")
@@ -24,6 +25,7 @@ export function registerCalendarTools(server: McpServer, supabase: SupabaseClien
         .lte("date", to);
 
       if (category_id) query = query.eq("category_id", category_id);
+      if (only_uncategorized) query = query.is("category_id", null);
       if (only_incomplete) query = query.eq("completed", false);
 
       const { data, error } = await query
@@ -209,6 +211,34 @@ export function registerCalendarTools(server: McpServer, supabase: SupabaseClien
 
       if (error) return err(error.message);
       return ok("Category deleted. Its events are now uncategorized.");
+    }
+  );
+
+  server.tool(
+    "categorize_events",
+    "File several events under one category at once — the bulk counterpart to update_event. Pass category_id null to clear the category instead. Use list_events with only_uncategorized to find candidates first.",
+    {
+      event_ids: z.array(z.string().uuid()).min(1).max(200),
+      category_id: z.string().uuid().nullable(),
+    },
+    async ({ event_ids, category_id }) => {
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .update({ category_id })
+        .in("id", event_ids)
+        .eq("user_id", env.USER_ID)
+        .select("id");
+
+      if (error) return err(error.message);
+
+      const updated = data?.length ?? 0;
+      const missed = event_ids.length - updated;
+      const suffix = missed > 0 ? ` ${missed} id(s) matched nothing and were skipped.` : "";
+      return ok(
+        category_id
+          ? `Filed ${updated} event(s) under the category.${suffix}`
+          : `Cleared the category on ${updated} event(s).${suffix}`
+      );
     }
   );
 }

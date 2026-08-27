@@ -55,10 +55,11 @@ If `MCP_AUTH_SECRET` is ever exposed (committed, pasted publicly), rotate it: ge
 ### Calendar
 | Tool | Description |
 |---|---|
-| `list_events` | List events within a date range (YYYY-MM-DD), optionally filtered by `category_id` or to incomplete items only |
+| `list_events` | List events within a date range (YYYY-MM-DD), optionally filtered by `category_id`, to uncategorized events only, or to incomplete items only |
 | `add_event` | Create a new event (accepts `category_id`, `course`, `completed`) |
 | `update_event` | Update an existing event by ID |
 | `delete_event` | Delete an event by ID |
+| `categorize_events` | File up to 200 events under one category in a single call (or pass `category_id: null` to clear it) |
 | `list_event_categories` | List event categories with color and coursework flag |
 | `add_event_category` | Create a new event category |
 | `update_event_category` | Update a category by ID |
