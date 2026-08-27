@@ -60,6 +60,7 @@ If `MCP_AUTH_SECRET` is ever exposed (committed, pasted publicly), rotate it: ge
 | `update_event` | Update an existing event by ID |
 | `delete_event` | Delete an event by ID |
 | `categorize_events` | File up to 200 events under one category in a single call (or pass `category_id: null` to clear it) |
+| `complete_events` | Mark up to 200 events complete (or incomplete) in a single call — only meaningful for events in a coursework category |
 | `list_event_categories` | List event categories with color and coursework flag |
 | `add_event_category` | Create a new event category |
 | `update_event_category` | Update a category by ID |

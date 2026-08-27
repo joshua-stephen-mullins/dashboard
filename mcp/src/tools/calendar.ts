@@ -241,4 +241,32 @@ export function registerCalendarTools(server: McpServer, supabase: SupabaseClien
       );
     }
   );
+
+  server.tool(
+    "complete_events",
+    "Mark several coursework events done (or not done) at once — the bulk counterpart to update_event's completed flag. completed only means anything for events in a coursework category (see list_event_categories). Use list_events with only_incomplete to find candidates first.",
+    {
+      event_ids: z.array(z.string().uuid()).min(1).max(200),
+      completed: z.boolean().default(true),
+    },
+    async ({ event_ids, completed }) => {
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .update({ completed })
+        .in("id", event_ids)
+        .eq("user_id", env.USER_ID)
+        .select("id");
+
+      if (error) return err(error.message);
+
+      const updated = data?.length ?? 0;
+      const missed = event_ids.length - updated;
+      const suffix = missed > 0 ? ` ${missed} id(s) matched nothing and were skipped.` : "";
+      return ok(
+        completed
+          ? `Marked ${updated} event(s) complete.${suffix}`
+          : `Marked ${updated} event(s) incomplete.${suffix}`
+      );
+    }
+  );
 }
