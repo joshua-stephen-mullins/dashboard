@@ -23,6 +23,24 @@ export const NITROGEN_NEEDS = [
 
 const HOURS = [24, 48, 72]
 
+// A Postgres `date` column arrives as "YYYY-MM-DD", and `new Date()` parses
+// that as UTC midnight. Anywhere west of Greenwich it then renders as the
+// previous calendar day, putting every dose a day early. Anchor a date-only
+// value to local midnight so the doses land on the day the user meant.
+function parsePitchDate(value) {
+  if (!value) return null
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value
+
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (dateOnly) {
+    const [, year, month, day] = dateOnly
+    return new Date(Number(year), Number(month) - 1, Number(day))
+  }
+
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
 export function totalFermaidO({ og, batchSizeGal, nitrogenNeed = 'medium' }) {
   const factor = YEAST_FACTORS[nitrogenNeed]
   if (og == null || !batchSizeGal || factor == null) return null
@@ -38,8 +56,7 @@ export function tosnaSchedule({ og, batchSizeGal, nitrogenNeed = 'medium', pitch
   if (total == null) return null
 
   const perDose = total / 4
-  const pitch = pitchDate ? new Date(pitchDate) : null
-  const validPitch = pitch && !Number.isNaN(pitch.getTime()) ? pitch : null
+  const validPitch = parsePitchDate(pitchDate)
 
   const doses = HOURS.map((hours, i) => ({
     doseNumber: i + 1,

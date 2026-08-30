@@ -4,10 +4,18 @@ import { dueDoses } from '../../utils/filters'
 import { fmtGravity } from '../../utils/calc'
 import styles from './NutrientSchedule.module.css'
 
-function fmtDate(iso) {
+// A planned dose is anchored to midnight of its day, so showing a time
+// would imply a precision the date-only pitch_date does not have. A dose
+// that was actually given has a real timestamp worth showing.
+function fmtDay(iso) {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: 'short', day: 'numeric', hour: 'numeric',
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+function fmtDateTime(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString(undefined, {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
   })
 }
 
@@ -95,7 +103,7 @@ export default function NutrientSchedule({ batch, additions, latestGravity, onGe
                 </span>
 
                 <span className={styles.doseWhen}>
-                  {given ? `given ${fmtDate(dose.added_at)}` : fmtDate(dose.scheduled_at)}
+                  {given ? `given ${fmtDateTime(dose.added_at)}` : fmtDay(dose.scheduled_at)}
                 </span>
 
                 {due.has(dose.id) && !given && <span className={styles.dueTag}>due</span>}

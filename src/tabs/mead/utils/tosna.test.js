@@ -61,6 +61,18 @@ describe('tosnaSchedule', () => {
   it('returns null when the inputs are incomplete', () => {
     expect(tosnaSchedule({ og: null, batchSizeGal: 5 })).toBeNull()
   })
+
+  // Postgres date columns arrive as "YYYY-MM-DD", which JS parses as UTC
+  // midnight. West of Greenwich that renders as the previous calendar day,
+  // so every dose used to display one day early.
+  it('anchors a date-only pitch date to local midnight, not UTC', () => {
+    const { doses } = tosnaSchedule({ og: 1.100, batchSizeGal: 1, pitchDate: '2026-08-31' })
+    const day = (iso) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    expect(day(doses[0].scheduledAt)).toBe('Sep 1')
+    expect(day(doses[1].scheduledAt)).toBe('Sep 2')
+    expect(day(doses[2].scheduledAt)).toBe('Sep 3')
+    expect(day(doses[3].scheduledAt)).toBe('Sep 7')
+  })
 })
 
 describe('goFermGrams', () => {

@@ -18,6 +18,22 @@ const sgToBrix = (sg: number) =>
 const abv = (og: number | null, fg: number | null) =>
   og == null || fg == null ? null : (og - fg) * 131.25;
 
+// Matches parsePitchDate in src/tabs/mead/utils/tosna.js. A `date` column
+// arrives as "YYYY-MM-DD", which parses as UTC midnight and renders a day
+// early west of Greenwich, so anchor it to local midnight instead.
+function parsePitchDate(value: string | null): Date | null {
+  if (!value) return null;
+
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (dateOnly) {
+    const [, year, month, day] = dateOnly;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 export function registerMeadTools(server: McpServer, supabase: SupabaseClient, env: Env) {
   server.tool(
     "list_mead_batches",
@@ -288,11 +304,9 @@ export function registerMeadTools(server: McpServer, supabase: SupabaseClient, e
       const perDose = total / 4;
       const sugarBreak = og - (og - 1) / 3;
 
-      const pitch = batch.pitch_date ? new Date(batch.pitch_date) : null;
+      const pitch = parsePitchDate(batch.pitch_date);
       const at = (hours: number) =>
-        pitch && !Number.isNaN(pitch.getTime())
-          ? new Date(pitch.getTime() + hours * 3_600_000).toISOString()
-          : null;
+        pitch ? new Date(pitch.getTime() + hours * 3_600_000).toISOString() : null;
 
       const doses = [
         { dose_number: 1, scheduled_at: at(24),      trigger: "24h after pitch",  gravity_at_addition: null },
