@@ -240,3 +240,103 @@ Apply these policies to `books`, `clothes`, `miniatures`, and `event_categories`
 | `miniature-images` | Public read, authenticated write | Miniatures tab — miniature photos |
 
 All buckets follow the same access policy: anyone can read (so URLs can render), but only authenticated users can upload. Images are uploaded from their respective tabs when the user provides a file, and the resulting public URL is stored in the corresponding image column.
+
+---
+
+### mead_batches
+One row per mead batch. Recipe and outcome live here; everything that happens over time lives in the three child tables below.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | Primary key, auto-generated |
+| user_id | uuid | Foreign key → auth.users |
+| name | text | e.g. "Blackberry Melomel #3" |
+| batch_number | integer | Nullable — the user's own numbering |
+| style | text | `traditional` \| `melomel` \| `cyser` \| `pyment` \| `metheglin` \| `braggot` \| `other` |
+| status | text | `planning` \| `primary` \| `secondary` \| `bulk_aging` \| `bottled` \| `drinking` \| `archived` |
+| vessel | text | Nullable — e.g. "1 gal carboy" |
+| image_url | text | Nullable — Supabase Storage URL or external URL |
+| source_url | text | Nullable — recipe source |
+| tags | text[] | Array of tag strings |
+| sweetness | text | Nullable — declared target; the *actual* bucket is derived from `fg` |
+| carbonation | text | `still` \| `petillant` \| `sparkling` |
+| batch_size_gal | numeric | Gallons — drives the TOSNA dose |
+| honey_varietal | text | e.g. "orange blossom" |
+| honey_source | text | Apiary or store |
+| honey_lbs | numeric | Weight, not volume |
+| honey_cost | numeric | USD, used for cost per bottle |
+| water_gal | numeric | Nullable |
+| adjuncts | jsonb | Array of `{name, amount, unit, stage}` for fruit, spice, grain |
+| yeast_strain | text | e.g. "Lalvin D47" |
+| yeast_nitrogen_need | text | `low` \| `medium` \| `high` — the TOSNA yeast factor (0.75 / 0.90 / 1.25) |
+| target_og / target_abv | numeric | Planning values |
+| og / fg | numeric | Measured original and final gravity |
+| brew_date / pitch_date / bottled_date / drink_by_date | date | Nullable |
+| bottle_count | integer | Bottles filled at packaging |
+| bottles_remaining | integer | Decremented as bottles are drunk |
+| bottle_size | text | e.g. "750 ml" |
+| carbonation_method | text | still / priming sugar / forced |
+| rating | integer | 1–5 |
+| tasting_notes / notes | text | Nullable |
+| created_at | timestamp | Auto-generated |
+
+**Derived, never stored:** ABV `(og − fg) × 131.25`, apparent attenuation, the sweetness bucket, the BJCP strength class, Brix conversions, and the TOSNA schedule. All live in `src/tabs/mead/utils/` so they cannot drift from the gravity readings they come from.
+
+#### Image Handling
+Follows the recipes pattern — file upload OR URL paste, upload wins. Bucket: `mead-images`.
+
+---
+
+### mead_readings
+Fermentation time series. One row per hydrometer / thermometer / pH check.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | Primary key |
+| user_id | uuid | Foreign key → auth.users |
+| batch_id | uuid | Foreign key → mead_batches, `on delete cascade` |
+| recorded_at | timestamptz | When the reading was taken |
+| gravity | numeric | Specific gravity |
+| temperature_f | numeric | Fahrenheit |
+| ph | numeric | Must pH — below 3.0 stalls fermentation |
+| degassed | boolean | Whether the batch was degassed at this check |
+| notes | text | Nullable |
+| created_at | timestamp | Auto-generated |
+
+---
+
+### mead_additions
+Anything put into the must after pitch. TOSNA doses are written here with `scheduled_at` set and `added_at` null until the dose is actually given.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | Primary key |
+| user_id | uuid | Foreign key → auth.users |
+| batch_id | uuid | Foreign key → mead_batches, `on delete cascade` |
+| category | text | `nutrient` \| `fruit` \| `spice` \| `oak` \| `acid` \| `stabilizer` \| `honey` \| `other` |
+| product | text | e.g. "Fermaid-O", "potassium sorbate" |
+| amount | numeric | Nullable |
+| unit | text | Default `g` |
+| dose_number | integer | 1–4 for a TOSNA schedule, null otherwise |
+| scheduled_at | timestamptz | When the dose is planned |
+| added_at | timestamptz | Null until given — this is what marks a dose complete |
+| gravity_at_addition | numeric | For dose 4, the 1/3 sugar break that triggers it |
+| notes | text | Nullable |
+| created_at | timestamp | Auto-generated |
+
+---
+
+### mead_events
+Process milestones — racking, degassing, stabilizing, backsweetening, fining, cold crashing, bottling.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | Primary key |
+| user_id | uuid | Foreign key → auth.users |
+| batch_id | uuid | Foreign key → mead_batches, `on delete cascade` |
+| event_type | text | `rack` \| `degas` \| `stabilize` \| `backsweeten` \| `fining` \| `oak` \| `cold_crash` \| `bottle` \| `taste` \| `other` |
+| occurred_at | timestamptz | When it happened |
+| gravity | numeric | Nullable — gravity at the time |
+| volume_lost | numeric | Nullable — e.g. gallons lost to racking |
+| notes | text | Nullable |
+| created_at | timestamp | Auto-generated |

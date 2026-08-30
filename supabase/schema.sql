@@ -190,3 +190,185 @@ create policy "Users can update own events"
 create policy "Users can delete own events"
   on calendar_events for delete
   using (auth.uid() = user_id);
+
+
+-- ── mead_batches ─────────────────────────────────────────────
+-- One row per batch. Recipe + outcome live here; everything that
+-- happens over time lives in the three child tables below.
+-- ABV, attenuation, and the sweetness bucket are derived from
+-- og/fg in src/tabs/mead/utils/calc.js, never stored.
+create table if not exists mead_batches (
+  id                  uuid primary key default gen_random_uuid(),
+  user_id             uuid not null references auth.users(id) on delete cascade,
+  name                text not null,
+  batch_number        integer,
+  style               text not null default 'traditional',
+  status              text not null default 'planning',
+  vessel              text,
+  image_url           text,
+  source_url          text,
+  tags                text[] not null default '{}',
+  sweetness           text,
+  carbonation         text default 'still',
+  batch_size_gal      numeric,
+  honey_varietal      text,
+  honey_source        text,
+  honey_lbs           numeric,
+  honey_cost          numeric,
+  water_gal           numeric,
+  adjuncts            jsonb not null default '[]',
+  yeast_strain        text,
+  yeast_nitrogen_need text default 'medium',
+  target_og           numeric,
+  target_abv          numeric,
+  og                  numeric,
+  fg                  numeric,
+  brew_date           date,
+  pitch_date          date,
+  bottled_date        date,
+  drink_by_date       date,
+  bottle_count        integer,
+  bottles_remaining   integer,
+  bottle_size         text,
+  carbonation_method  text,
+  rating              integer,
+  tasting_notes       text,
+  notes               text,
+  created_at          timestamptz not null default now()
+);
+
+create index if not exists mead_batches_user_status_idx
+  on mead_batches (user_id, status);
+
+alter table mead_batches enable row level security;
+
+create policy "Users can view own mead_batches"
+  on mead_batches for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own mead_batches"
+  on mead_batches for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own mead_batches"
+  on mead_batches for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own mead_batches"
+  on mead_batches for delete
+  using (auth.uid() = user_id);
+
+
+-- ── mead_readings ────────────────────────────────────────────
+-- Fermentation time series: gravity, temperature, pH.
+create table if not exists mead_readings (
+  id             uuid primary key default gen_random_uuid(),
+  user_id        uuid not null references auth.users(id) on delete cascade,
+  batch_id       uuid not null references mead_batches(id) on delete cascade,
+  recorded_at    timestamptz not null default now(),
+  gravity        numeric,
+  temperature_f  numeric,
+  ph             numeric,
+  degassed       boolean not null default false,
+  notes          text,
+  created_at     timestamptz not null default now()
+);
+
+create index if not exists mead_readings_batch_idx
+  on mead_readings (batch_id, recorded_at);
+
+alter table mead_readings enable row level security;
+
+create policy "Users can view own mead_readings"
+  on mead_readings for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own mead_readings"
+  on mead_readings for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own mead_readings"
+  on mead_readings for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own mead_readings"
+  on mead_readings for delete
+  using (auth.uid() = user_id);
+
+
+-- ── mead_additions ───────────────────────────────────────────
+-- Anything put into the must after pitch. Nutrient doses are
+-- generated from the TOSNA schedule with scheduled_at set and
+-- added_at null until the dose is actually given.
+create table if not exists mead_additions (
+  id                  uuid primary key default gen_random_uuid(),
+  user_id             uuid not null references auth.users(id) on delete cascade,
+  batch_id            uuid not null references mead_batches(id) on delete cascade,
+  category            text not null default 'nutrient',
+  product             text not null,
+  amount              numeric,
+  unit                text default 'g',
+  dose_number         integer,
+  scheduled_at        timestamptz,
+  added_at            timestamptz,
+  gravity_at_addition numeric,
+  notes               text,
+  created_at          timestamptz not null default now()
+);
+
+create index if not exists mead_additions_batch_idx
+  on mead_additions (batch_id, scheduled_at);
+
+alter table mead_additions enable row level security;
+
+create policy "Users can view own mead_additions"
+  on mead_additions for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own mead_additions"
+  on mead_additions for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own mead_additions"
+  on mead_additions for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own mead_additions"
+  on mead_additions for delete
+  using (auth.uid() = user_id);
+
+
+-- ── mead_events ──────────────────────────────────────────────
+-- Process milestones: racking, stabilizing, backsweetening, bottling.
+create table if not exists mead_events (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references auth.users(id) on delete cascade,
+  batch_id      uuid not null references mead_batches(id) on delete cascade,
+  event_type    text not null,
+  occurred_at   timestamptz not null default now(),
+  gravity       numeric,
+  volume_lost   numeric,
+  notes         text,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists mead_events_batch_idx
+  on mead_events (batch_id, occurred_at);
+
+alter table mead_events enable row level security;
+
+create policy "Users can view own mead_events"
+  on mead_events for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own mead_events"
+  on mead_events for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own mead_events"
+  on mead_events for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own mead_events"
+  on mead_events for delete
+  using (auth.uid() = user_id);

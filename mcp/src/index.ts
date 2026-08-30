@@ -7,6 +7,7 @@ import { registerFixtureTools } from "./tools/fixtures.js";
 import { registerStockTools } from "./tools/stocks.js";
 import { registerCalendarTools } from "./tools/calendar.js";
 import { registerBookTools } from "./tools/books.js";
+import { registerMeadTools } from "./tools/mead.js";
 
 export interface Env {
   SUPABASE_URL: string;
@@ -82,6 +83,7 @@ export default {
     registerStockTools(server, supabase, env);
     registerCalendarTools(server, supabase, env);
     registerBookTools(server, supabase, env);
+    registerMeadTools(server, supabase, env);
 
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await server.connect(serverTransport);

@@ -8,6 +8,7 @@ const TABS = [
   { to: '/stocks',   label: 'Stocks' },
   { to: '/calendar', label: 'Calendar' },
   { to: '/books',    label: 'Books' },
+  { to: '/mead',     label: 'Mead' },
 ]
 
 export default function Navbar() {

@@ -95,6 +95,21 @@ If `MCP_AUTH_SECRET` is ever exposed (committed, pasted publicly), rotate it: ge
 | `update_miniature` | Update a miniature by ID |
 | `delete_miniature` | Delete a miniature by ID |
 
+### Mead
+| Tool | Description |
+|---|---|
+| `list_mead_batches` | List all batches (name, style, status, gravities, bottles left); optionally filtered by status. ABV is computed on the way out |
+| `get_mead_batch` | Get a batch with its full log — readings, additions, and events |
+| `add_mead_batch` | Start a new batch |
+| `update_mead_batch` | Update a batch by ID — commonly status, FG, or bottle counts |
+| `delete_mead_batch` | Delete a batch and its entire log |
+| `log_mead_reading` | Record a gravity / temperature / pH reading. Warns when pH drops below 3.0 |
+| `log_mead_addition` | Record nutrients, fruit, spice, oak, acid, stabilizer, or backsweetening honey |
+| `log_mead_event` | Record a milestone — rack, degas, stabilize, backsweeten, fine, cold crash, bottle |
+| `mead_tosna_schedule` | Calculate the TOSNA 3.0 Fermaid-O schedule for a batch, optionally saving the four doses |
+| `mead_doses_due` | List nutrient doses due now across all batches |
+| `drink_mead_bottle` | Decrement a batch's remaining bottle count |
+
 ---
 
 ## Adding Tools for a New Tab

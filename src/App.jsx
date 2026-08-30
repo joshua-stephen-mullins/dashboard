@@ -11,6 +11,7 @@ import CookingMode from './tabs/recipes/CookingMode'
 import StocksTab from './tabs/stocks/index'
 import CalendarTab from './tabs/calendar/index'
 import BooksTab from './tabs/books/index'
+import MeadTab from './tabs/mead/index'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,7 @@ export default function App() {
               <Route path="/stocks" element={<ProtectedRoute><StocksTab /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><CalendarTab /></ProtectedRoute>} />
               <Route path="/books" element={<ProtectedRoute><BooksTab /></ProtectedRoute>} />
+              <Route path="/mead" element={<ProtectedRoute><MeadTab /></ProtectedRoute>} />
             </Route>
           </Routes>
         </BrowserRouter>

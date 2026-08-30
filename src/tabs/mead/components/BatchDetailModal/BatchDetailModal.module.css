@@ -1,0 +1,308 @@
+.sectionNav {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.sectionBtn {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-3);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.sectionBtn:hover {
+  color: var(--color-text);
+}
+
+.sectionActive {
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.hero {
+  width: 100%;
+  border-radius: var(--radius-md);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stat dd {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.detailList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2) var(--space-4);
+}
+
+.detailList > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-1);
+}
+
+.detailList dt {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+}
+
+.detailList dd {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text);
+  text-align: right;
+}
+
+.sectionLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-2);
+}
+
+.prose {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.hint {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-3);
+}
+
+.quickForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.quickRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: var(--space-2);
+}
+
+.input {
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  cursor: pointer;
+}
+
+.saveBtn {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  align-self: flex-start;
+  transition: opacity 0.15s ease;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-3);
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table td {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.log {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.logItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.logType {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-teal);
+}
+
+.logBody {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.logWhen {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  padding: var(--space-1);
+  transition: color 0.15s ease;
+}
+
+.removeBtn:hover {
+  color: var(--color-red);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.ghostBtn {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  background: transparent;
+  color: var(--color-text-3);
+  border: 1px solid var(--color-border);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.ghostBtn:hover {
+  color: var(--color-text);
+}
+
+.dangerBtn {
+  composes: ghostBtn;
+}
+
+.dangerBtn:hover {
+  color: var(--color-red);
+  border-color: var(--color-red);
+}
+
+@media (max-width: 640px) {
+  .statGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detailList {
+    grid-template-columns: 1fr;
+  }
+}

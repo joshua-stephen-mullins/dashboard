@@ -1,7 +1,7 @@
 # CLAUDE.md — Dashboard Project Instructions
 
 ## What This App Is
-Dashboard is a personal dashboard SPA built for a single user. It aggregates everything the user cares about into one place: soccer fixtures, recipes, a stock portfolio, a calendar, a personal library, a wardrobe inventory, and a D&D miniature collection. It is private, login-protected, and designed to be easily extended with new tabs over time.
+Dashboard is a personal dashboard SPA built for a single user. It aggregates everything the user cares about into one place: soccer fixtures, recipes, a stock portfolio, a calendar, a personal library, a wardrobe inventory, a D&D miniature collection, and a mead brewing log. It is private, login-protected, and designed to be easily extended with new tabs over time.
 
 ---
 
@@ -77,6 +77,7 @@ See `docs/MCP.md` for the Cloudflare Workers MCP server — tools exposed, auth 
 - [ ] Books tab
 - [ ] Clothes tab
 - [ ] Miniatures tab
+- [x] Mead tab
 - [ ] Deployment
 - [ ] MCP server (Cloudflare Workers)
 
@@ -98,3 +99,6 @@ See `docs/MCP.md` for the Cloudflare Workers MCP server — tools exposed, auth 
 - Never query Open Library directly from frontend code — always go through the `lookup-book` edge function
 - Never hardcode a calendar category — categories are user-managed rows in `event_categories`, and the coursework fields (`course`, `completed`) are driven by the category's `is_coursework` flag, never by a category's name
 - Never set a categorized event's color independently — a categorized event's color comes from its category
+- Never store a mead batch's ABV, attenuation, or sweetness bucket — they are derived from `og`/`fg` in `src/tabs/mead/utils/calc.js` and would drift the moment a gravity reading is corrected
+- Never mark a TOSNA dose complete by deleting it or by any field other than `added_at` — a dose with `scheduled_at` set and `added_at` null is a planned dose, and that distinction is what drives the "due" state
+- Never change the TOSNA formula or its yeast factors (low 0.75 / medium 0.90 / high 1.25) in one place only — `src/tabs/mead/utils/tosna.js` and `mcp/src/tools/mead.ts` implement it twice and must agree

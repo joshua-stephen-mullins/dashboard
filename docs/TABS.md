@@ -407,3 +407,47 @@ Each card shows:
 - Painting progress workflows
 - Color scheme or paint recipe notes
 - Game system field (D&D only)
+
+---
+
+# Mead Tab
+
+## Purpose
+A brewing log for the user's own mead batches — not a recipe collection. Each batch is a record that accumulates readings over weeks or months, so the tab is built around a parent batch plus three time-series children rather than a single flat row.
+
+## Data Model
+One `mead_batches` row per batch, plus `mead_readings`, `mead_additions`, and `mead_events` hanging off it (all `on delete cascade`). See `docs/DATABASE.md`.
+
+## Derived Values
+Nothing computed is ever stored. `src/tabs/mead/utils/calc.js` owns:
+- **ABV** — `(OG − FG) × 131.25`, the standard homebrew approximation
+- **Apparent attenuation** — `(OG − FG) / (OG − 1)`
+- **Sweetness bucket** — dry `< 1.010`, semi-sweet `1.010–1.025`, sweet `> 1.025`
+- **BJCP strength class** — hydromel `< 7.5%`, standard `7.5–14%`, sack `≥ 14%`
+- **Brix ↔ SG** — the standard cubic approximation
+- **1/3 sugar break** — `OG − (OG − 1) / 3`, the trigger for the final nutrient dose
+
+## TOSNA 3.0 Nutrient Calculator
+`src/tabs/mead/utils/tosna.js` implements Tailored Organic Staggered Nutrient Addition:
+
+```
+total Fermaid-O (g) = (Brix × 10 × gallons × yeastFactor) / 50
+yeastFactor: low 0.75 · medium 0.90 · high 1.25
+```
+
+Split into four equal doses at **24h, 48h, 72h after pitch**, and at the **1/3 sugar break or day 7, whichever comes first**. Saving the schedule writes four `mead_additions` rows with `scheduled_at` set and `added_at` null; a dose is complete only when `added_at` is filled in. The fourth dose also stores its trigger gravity in `gravity_at_addition`, so it can fire on gravity rather than only on the calendar.
+
+## Fermentation Chart
+Hand-rolled SVG in `components/FermentationChart` — the project has no charting dependency and three series over a handful of points does not warrant one. Gravity, temperature, and pH sit on incompatible scales, so each series is normalised against its own min/max and the legend carries its real range. Series can be toggled off.
+
+## Bottle Inventory
+`bottle_count` is set at packaging; `bottles_remaining` decrements as bottles are drunk or gifted, from the UI or the `drink_mead_bottle` MCP tool. Rendered as one pip per bottle rather than a progress bar, because a bar's width would require an inline style.
+
+## Image Handling
+Follows the recipes pattern — file upload OR URL paste, upload wins. Bucket: `mead-images`.
+
+## What Is NOT in Scope
+- Recipe scaling or a recipe designer
+- Water chemistry / mineral additions
+- Competition scoresheet tracking
+- Sharing batches with other users

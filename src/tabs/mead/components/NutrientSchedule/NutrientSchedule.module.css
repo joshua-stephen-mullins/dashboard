@@ -1,0 +1,139 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.summaryStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summaryLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.summaryValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+.hint {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  line-height: 1.5;
+}
+
+.generate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.generateBtn {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.generateBtn:hover {
+  opacity: 0.85;
+}
+
+.doses {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dose {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.due {
+  border-color: var(--color-amber);
+}
+
+.given .doseName {
+  color: var(--color-text-3);
+  text-decoration: line-through;
+}
+
+.doseCheck {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.doseName {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.doseAmount,
+.doseWhen {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+}
+
+.doseWhen {
+  color: var(--color-text-3);
+}
+
+.dueTag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-amber);
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  padding: var(--space-1);
+  transition: color 0.15s ease;
+}
+
+.removeBtn:hover {
+  color: var(--color-red);
+}
