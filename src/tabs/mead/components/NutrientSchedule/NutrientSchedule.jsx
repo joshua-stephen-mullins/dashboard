@@ -111,7 +111,7 @@ export default function NutrientSchedule({ batch, additions, latestGravity, onGe
                 <button
                   type="button"
                   className={styles.removeBtn}
-                  onClick={() => onRemove(dose.id)}
+                  onClick={() => onRemove(dose)}
                   aria-label={`Remove dose ${dose.dose_number ?? ''}`}
                 >
                   ✕

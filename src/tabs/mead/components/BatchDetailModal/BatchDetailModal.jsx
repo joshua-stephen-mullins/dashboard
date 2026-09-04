@@ -43,6 +43,7 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
 
   const [reading, setReading] = useState({ gravity: '', temperature_f: '', ph: '', notes: '' })
   const [editingReading, setEditingReading] = useState(null)
+  const [pendingDelete, setPendingDelete] = useState(null)
   const [addition, setAddition] = useState({ category: 'fruit', product: '', amount: '', unit: 'g', notes: '' })
   const [event, setEvent] = useState({ event_type: 'rack', gravity: '', notes: '' })
 
@@ -66,6 +67,23 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
   function resetReadingForm() {
     setEditingReading(null)
     setReading({ gravity: '', temperature_f: '', ph: '', notes: '' })
+  }
+
+  // Every row delete routes through one confirm. The rows are small and
+  // the edit button sits next to the delete, so a misclick is easy and
+  // the log it destroys is not reconstructable.
+  function confirmDelete() {
+    if (!pendingDelete) return
+    const { kind, id } = pendingDelete
+
+    if (kind === 'reading') {
+      readings.remove.mutate(id)
+      if (editingReading?.id === id) resetReadingForm()
+    } else if (kind === 'event') {
+      events.remove.mutate(id)
+    } else {
+      additions.remove.mutate(id)
+    }
   }
 
   function startEditReading(row) {
@@ -300,7 +318,12 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
                           <button type="button" className={styles.editBtn}
                             onClick={() => startEditReading(r)} aria-label="Edit reading">✎</button>
                           <button type="button" className={styles.removeBtn}
-                            onClick={() => readings.remove.mutate(r.id)} aria-label="Delete reading">✕</button>
+                            onClick={() => setPendingDelete({
+                              kind: 'reading',
+                              id: r.id,
+                              label: `the reading from ${fmtDateTime(r.recorded_at)}`,
+                            })}
+                            aria-label="Delete reading">✕</button>
                         </div>
                       </td>
                     </tr>
@@ -319,7 +342,11 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
               latestGravity={latestGravity}
               onGenerate={generateSchedule}
               onMarkGiven={markGiven}
-              onRemove={(id) => additions.remove.mutate(id)}
+              onRemove={(dose) => setPendingDelete({
+                kind: 'dose',
+                id: dose.id,
+                label: dose.dose_number ? `nutrient dose ${dose.dose_number}` : dose.product,
+              })}
             />
 
             <form className={styles.quickForm} onSubmit={submitAddition}>
@@ -352,7 +379,8 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
                     </span>
                     <span className={styles.logWhen}>{fmtDateTime(a.added_at)}</span>
                     <button type="button" className={styles.removeBtn}
-                      onClick={() => additions.remove.mutate(a.id)} aria-label="Delete addition">✕</button>
+                      onClick={() => setPendingDelete({ kind: 'addition', id: a.id, label: a.product })}
+                      aria-label="Delete addition">✕</button>
                   </li>
                 ))}
               </ul>
@@ -387,7 +415,12 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
                     <span className={styles.logBody}>{ev.notes ?? ''}</span>
                     <span className={styles.logWhen}>{fmtDateTime(ev.occurred_at)}</span>
                     <button type="button" className={styles.removeBtn}
-                      onClick={() => events.remove.mutate(ev.id)} aria-label="Delete event">✕</button>
+                      onClick={() => setPendingDelete({
+                        kind: 'event',
+                        id: ev.id,
+                        label: `the ${ev.event_type.replace('_', ' ')} event`,
+                      })}
+                      aria-label="Delete event">✕</button>
                   </li>
                 ))}
               </ul>
@@ -406,6 +439,17 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
           </div>
         )}
       </Modal>
+
+      {pendingDelete && (
+        <ConfirmModal
+          title="Delete this entry?"
+          message={`${pendingDelete.label} will be removed from the log. This cannot be undone.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={confirmDelete}
+          onClose={() => setPendingDelete(null)}
+        />
+      )}
 
       {confirming && (
         <ConfirmModal

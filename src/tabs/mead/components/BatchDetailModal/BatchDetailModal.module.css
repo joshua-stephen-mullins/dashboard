@@ -189,7 +189,7 @@
 .rowActions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-1);
+  gap: var(--space-3);
 }
 
 .editBtn {

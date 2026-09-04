@@ -443,6 +443,8 @@ Hand-rolled SVG in `components/FermentationChart` — the project has no chartin
 ## Editing readings
 The readings table has an edit (✎) and a delete (✕) per row. Editing loads the row back into the log form and preserves its original `recorded_at` — a correction records when the reading was taken, not when the mistake was noticed. `update_mead_reading` and `delete_mead_reading` do the same over MCP.
 
+Every row delete — readings, nutrient doses, additions, and events — routes through a `ConfirmModal` naming the entry. The rows are dense and the edit button sits beside the delete, so a misclick is easy and the log it destroys cannot be reconstructed.
+
 ## Degassing
 Degassing is recorded as a `degas` row in `mead_events`, not as a flag on a reading. An earlier `degassed` boolean on the readings form was removed: in practice the whole batch is degassed and then sampled, so the two recorded the same act in two places, and the flag was easy to tick backwards. The `degassed` column remains on `mead_readings` for the rows that already carry it, but nothing writes it.
 
