@@ -180,6 +180,36 @@
   cursor: default;
 }
 
+.formActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rowActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
+
+.editBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  padding: var(--space-1);
+  transition: color 0.15s ease;
+}
+
+.editBtn:hover {
+  color: var(--color-accent);
+}
+
+.editingRow td {
+  background: var(--color-bg-4);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

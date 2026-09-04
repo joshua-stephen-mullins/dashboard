@@ -440,6 +440,9 @@ Split into four equal doses at **24h, 48h, 72h after pitch**, and at the **1/3 s
 ## Fermentation Chart
 Hand-rolled SVG in `components/FermentationChart` — the project has no charting dependency and three series over a handful of points does not warrant one. Gravity, temperature, and pH sit on incompatible scales, so each series is normalised against its own min/max and the legend carries its real range. Series can be toggled off.
 
+## Editing readings
+The readings table has an edit (✎) and a delete (✕) per row. Editing loads the row back into the log form and preserves its original `recorded_at` — a correction records when the reading was taken, not when the mistake was noticed. `update_mead_reading` and `delete_mead_reading` do the same over MCP.
+
 ## Degassing
 Degassing is recorded as a `degas` row in `mead_events`, not as a flag on a reading. An earlier `degassed` boolean on the readings form was removed: in practice the whole batch is degassed and then sampled, so the two recorded the same act in two places, and the flag was easy to tick backwards. The `degassed` column remains on `mead_readings` for the rows that already carry it, but nothing writes it.
 

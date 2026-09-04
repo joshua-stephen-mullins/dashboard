@@ -42,6 +42,7 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
   const { readings, additions, events } = useBatchLog(batch.id)
 
   const [reading, setReading] = useState({ gravity: '', temperature_f: '', ph: '', notes: '' })
+  const [editingReading, setEditingReading] = useState(null)
   const [addition, setAddition] = useState({ category: 'fruit', product: '', amount: '', unit: 'g', notes: '' })
   const [event, setEvent] = useState({ event_type: 'rack', gravity: '', notes: '' })
 
@@ -62,16 +63,40 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
   const finalAbv = abv(og, num(batch.fg))
   const age = daysBetween(batch.brew_date)
 
+  function resetReadingForm() {
+    setEditingReading(null)
+    setReading({ gravity: '', temperature_f: '', ph: '', notes: '' })
+  }
+
+  function startEditReading(row) {
+    setEditingReading(row)
+    setReading({
+      gravity: row.gravity ?? '',
+      temperature_f: row.temperature_f ?? '',
+      ph: row.ph ?? '',
+      notes: row.notes ?? '',
+    })
+  }
+
   async function submitReading(e) {
     e.preventDefault()
-    await readings.add.mutateAsync({
-      recorded_at: new Date().toISOString(),
+    const fields = {
       gravity: num(reading.gravity),
       temperature_f: num(reading.temperature_f),
       ph: num(reading.ph),
       notes: reading.notes.trim() || null,
-    })
-    setReading({ gravity: '', temperature_f: '', ph: '', notes: '' })
+    }
+
+    // An edit keeps the original recorded_at. The timestamp is the one
+    // thing a correction must not overwrite — it's when the reading was
+    // actually taken, not when the typo was noticed.
+    if (editingReading) {
+      await readings.update.mutateAsync({ id: editingReading.id, ...fields })
+    } else {
+      await readings.add.mutateAsync({ recorded_at: new Date().toISOString(), ...fields })
+    }
+
+    resetReadingForm()
   }
 
   async function submitAddition(e) {
@@ -224,7 +249,11 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
             <FermentationChart readings={readingRows} />
 
             <form className={styles.quickForm} onSubmit={submitReading}>
-              <p className={styles.sectionLabel}>Log a reading</p>
+              <p className={styles.sectionLabel}>
+                {editingReading
+                  ? `Edit reading — ${fmtDateTime(editingReading.recorded_at)}`
+                  : 'Log a reading'}
+              </p>
               <div className={styles.quickRow}>
                 <input className={styles.input} type="number" step="0.001" placeholder="SG"
                   value={reading.gravity} onChange={(e) => setReading({ ...reading, gravity: e.target.value })} />
@@ -235,9 +264,20 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
               </div>
               <input className={styles.input} placeholder="Notes"
                 value={reading.notes} onChange={(e) => setReading({ ...reading, notes: e.target.value })} />
-              <button type="submit" className={styles.saveBtn} disabled={readings.add.isPending}>
-                Add reading
-              </button>
+              <div className={styles.formActions}>
+                <button
+                  type="submit"
+                  className={styles.saveBtn}
+                  disabled={readings.add.isPending || readings.update.isPending}
+                >
+                  {editingReading ? 'Update reading' : 'Add reading'}
+                </button>
+                {editingReading && (
+                  <button type="button" className={styles.ghostBtn} onClick={resetReadingForm}>
+                    Cancel
+                  </button>
+                )}
+              </div>
             </form>
 
             {readingRows.length > 0 && (
@@ -247,14 +287,21 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
                 </thead>
                 <tbody>
                   {[...readingRows].reverse().map((r) => (
-                    <tr key={r.id}>
+                    <tr
+                      key={r.id}
+                      className={editingReading?.id === r.id ? styles.editingRow : undefined}
+                    >
                       <td>{fmtDateTime(r.recorded_at)}</td>
                       <td>{fmtGravity(num(r.gravity))}</td>
                       <td>{fmtTemp(num(r.temperature_f))}</td>
                       <td>{fmtPh(num(r.ph))}</td>
                       <td>
-                        <button type="button" className={styles.removeBtn}
-                          onClick={() => readings.remove.mutate(r.id)} aria-label="Delete reading">✕</button>
+                        <div className={styles.rowActions}>
+                          <button type="button" className={styles.editBtn}
+                            onClick={() => startEditReading(r)} aria-label="Edit reading">✎</button>
+                          <button type="button" className={styles.removeBtn}
+                            onClick={() => readings.remove.mutate(r.id)} aria-label="Delete reading">✕</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
