@@ -104,6 +104,8 @@ If `MCP_AUTH_SECRET` is ever exposed (committed, pasted publicly), rotate it: ge
 | `update_mead_batch` | Update a batch by ID — commonly status, FG, or bottle counts |
 | `delete_mead_batch` | Delete a batch and its entire log |
 | `log_mead_reading` | Record a gravity / temperature / pH reading. Warns when pH drops below 3.0 |
+| `update_mead_reading` | Correct a logged reading by ID — the UI has no edit path for readings |
+| `delete_mead_reading` | Delete a logged reading by ID |
 | `log_mead_addition` | Record nutrients, fruit, spice, oak, acid, stabilizer, or backsweetening honey |
 | `log_mead_event` | Record a milestone — rack, degas, stabilize, backsweeten, fine, cold crash, bottle |
 | `mead_tosna_schedule` | Calculate the TOSNA 3.0 Fermaid-O schedule for a batch, optionally saving the four doses |

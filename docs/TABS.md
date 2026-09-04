@@ -440,6 +440,9 @@ Split into four equal doses at **24h, 48h, 72h after pitch**, and at the **1/3 s
 ## Fermentation Chart
 Hand-rolled SVG in `components/FermentationChart` — the project has no charting dependency and three series over a handful of points does not warrant one. Gravity, temperature, and pH sit on incompatible scales, so each series is normalised against its own min/max and the legend carries its real range. Series can be toggled off.
 
+## Degassing
+Degassing is recorded as a `degas` row in `mead_events`, not as a flag on a reading. An earlier `degassed` boolean on the readings form was removed: in practice the whole batch is degassed and then sampled, so the two recorded the same act in two places, and the flag was easy to tick backwards. The `degassed` column remains on `mead_readings` for the rows that already carry it, but nothing writes it.
+
 ## Bottle Inventory
 `bottle_count` is set at packaging; `bottles_remaining` decrements as bottles are drunk or gifted, from the UI or the `drink_mead_bottle` MCP tool. Rendered as one pip per bottle rather than a progress bar, because a bar's width would require an inline style.
 

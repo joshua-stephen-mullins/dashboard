@@ -223,6 +223,52 @@ export function registerMeadTools(server: McpServer, supabase: SupabaseClient, e
   );
 
   server.tool(
+    "update_mead_reading",
+    "Correct a logged fermentation reading by ID — only the fields you provide are changed. Pass null to clear a field.",
+    {
+      id:            z.string().uuid(),
+      gravity:       z.number().nullable().optional(),
+      temperature_f: z.number().nullable().optional(),
+      ph:            z.number().nullable().optional(),
+      degassed:      z.boolean().optional(),
+      notes:         z.string().nullable().optional(),
+      recorded_at:   z.string().optional(),
+    },
+    async ({ id, ...fields }) => {
+      const updates = Object.fromEntries(
+        Object.entries(fields).filter(([, v]) => v !== undefined)
+      );
+
+      if (Object.keys(updates).length === 0) return err("No fields provided to update");
+
+      const { error } = await supabase
+        .from("mead_readings")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", env.USER_ID);
+
+      if (error) return err(error.message);
+      return ok("Reading updated.");
+    }
+  );
+
+  server.tool(
+    "delete_mead_reading",
+    "Delete a logged fermentation reading by ID",
+    { id: z.string().uuid() },
+    async ({ id }) => {
+      const { error } = await supabase
+        .from("mead_readings")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", env.USER_ID);
+
+      if (error) return err(error.message);
+      return ok("Reading deleted.");
+    }
+  );
+
+  server.tool(
     "log_mead_addition",
     "Record something added to a batch — nutrients, fruit, spice, oak, acid, stabilizer, or backsweetening honey",
     {

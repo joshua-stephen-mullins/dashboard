@@ -41,7 +41,7 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
   const [confirming, setConfirming] = useState(false)
   const { readings, additions, events } = useBatchLog(batch.id)
 
-  const [reading, setReading] = useState({ gravity: '', temperature_f: '', ph: '', degassed: false, notes: '' })
+  const [reading, setReading] = useState({ gravity: '', temperature_f: '', ph: '', notes: '' })
   const [addition, setAddition] = useState({ category: 'fruit', product: '', amount: '', unit: 'g', notes: '' })
   const [event, setEvent] = useState({ event_type: 'rack', gravity: '', notes: '' })
 
@@ -69,10 +69,9 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
       gravity: num(reading.gravity),
       temperature_f: num(reading.temperature_f),
       ph: num(reading.ph),
-      degassed: reading.degassed,
       notes: reading.notes.trim() || null,
     })
-    setReading({ gravity: '', temperature_f: '', ph: '', degassed: false, notes: '' })
+    setReading({ gravity: '', temperature_f: '', ph: '', notes: '' })
   }
 
   async function submitAddition(e) {
@@ -236,11 +235,6 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
               </div>
               <input className={styles.input} placeholder="Notes"
                 value={reading.notes} onChange={(e) => setReading({ ...reading, notes: e.target.value })} />
-              <label className={styles.check}>
-                <input type="checkbox" checked={reading.degassed}
-                  onChange={(e) => setReading({ ...reading, degassed: e.target.checked })} />
-                Degassed
-              </label>
               <button type="submit" className={styles.saveBtn} disabled={readings.add.isPending}>
                 Add reading
               </button>
