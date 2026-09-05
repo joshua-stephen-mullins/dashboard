@@ -246,7 +246,7 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
 
             {batch.notes && (
               <section>
-                <p className={styles.sectionLabel}>Recipe notes</p>
+                <p className={styles.sectionLabel}>Batch notes</p>
                 <p className={styles.prose}>{batch.notes}</p>
               </section>
             )}

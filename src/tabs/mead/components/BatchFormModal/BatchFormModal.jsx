@@ -422,7 +422,7 @@ export default function BatchFormModal({ batch, onSave, onClose }) {
         </label>
 
         <label className={styles.field}>
-          Recipe notes
+          Batch notes
           <textarea
             className={styles.textarea}
             rows={3}
