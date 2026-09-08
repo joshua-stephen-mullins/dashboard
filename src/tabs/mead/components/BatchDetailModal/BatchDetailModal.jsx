@@ -264,7 +264,7 @@ export default function BatchDetailModal({ batch, onEdit, onUpdate, onDelete, on
 
         {section === 'readings' && (
           <div className={styles.stack}>
-            <FermentationChart readings={readingRows} />
+            <FermentationChart readings={readingRows} og={og} />
 
             <form className={styles.quickForm} onSubmit={submitReading}>
               <p className={styles.sectionLabel}>

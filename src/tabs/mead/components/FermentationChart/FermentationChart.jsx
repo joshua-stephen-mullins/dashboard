@@ -1,143 +1,155 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { fmtGravity, fmtPh, fmtTemp } from '../../utils/calc'
 import styles from './FermentationChart.module.css'
 
-// Hand-rolled SVG — the project has no charting dependency, and three
-// series over a handful of points does not warrant one.
+// Small multiples: one panel per measure, stacked on a shared time axis.
 //
-// Gravity, temperature and pH live on wildly different scales, so each
-// series is normalised against its own min/max. The legend carries each
-// series' real range so the shapes stay readable without lying about
-// the numbers.
-const SERIES = [
-  { key: 'gravity',       label: 'Gravity', className: 'gravity',     format: fmtGravity },
-  { key: 'temperature_f', label: 'Temp',    className: 'temperature', format: fmtTemp },
-  { key: 'ph',            label: 'pH',      className: 'ph',          format: fmtPh },
-]
+// These three series share no scale — gravity moves in thousandths, temperature
+// in degrees, pH in tenths — so drawing them on one plot means three invented
+// y-scales overlaid, which manufactures crossings that mean nothing.
+//
+// Each panel also gets a domain chosen for MEANING rather than fitted to its own
+// min/max. Fitting is what made a pH that moved 0.25 render as a full-height
+// climb: a series that barely moved should look like a series that barely moved.
+const W = 480
+const PANEL_H = 64
+const PAD = { top: 8, right: 6, bottom: 8, left: 6 }
+const PLOT_H = PANEL_H - PAD.top - PAD.bottom
+const PLOT_W = W - PAD.left - PAD.right
 
-const W = 640
-const H = 220
-const PAD = { top: 16, right: 16, bottom: 28, left: 16 }
-
-function buildSeries(readings, key) {
-  const points = readings
-    .map((r) => ({ t: new Date(r.recorded_at).getTime(), v: r[key] == null ? null : Number(r[key]) }))
-    .filter((p) => p.v != null && !Number.isNaN(p.t))
-
-  if (points.length === 0) return null
-
-  const values = points.map((p) => p.v)
-  return { points, min: Math.min(...values), max: Math.max(...values) }
+// Gravity is read against its journey from OG down to dry, not against
+// whatever window this batch happens to have covered so far.
+function gravityDomain(values, og) {
+  return [
+    Math.min(0.995, ...values),
+    Math.max(...(og == null ? values : [og, ...values])),
+  ]
 }
 
-export default function FermentationChart({ readings = [] }) {
-  const [hidden, setHidden] = useState([])
+// The band that actually matters for a mead must: 3.0 is where fermentation
+// starts to stall, and the top of the range is a healthy young must.
+function phDomain(values) {
+  return [Math.min(2.8, ...values), Math.max(4.2, ...values)]
+}
 
-  const series = useMemo(() => {
-    const out = {}
-    for (const s of SERIES) out[s.key] = buildSeries(readings, s.key)
-    return out
-  }, [readings])
+// Centred on the data, but never narrower than 20°F — a few degrees of drift
+// should read as a few degrees of drift.
+function tempDomain(values) {
+  const lo = Math.min(...values)
+  const hi = Math.max(...values)
+  const mid = (lo + hi) / 2
+  const span = Math.max(hi - lo, 20)
+  return [mid - span / 2, mid + span / 2]
+}
 
-  const times = readings
-    .map((r) => new Date(r.recorded_at).getTime())
-    .filter((t) => !Number.isNaN(t))
+const SERIES = [
+  { key: 'gravity',       label: 'Gravity', className: 'gravity',     format: fmtGravity, domain: gravityDomain },
+  { key: 'temperature_f', label: 'Temp',    className: 'temperature', format: fmtTemp,    domain: tempDomain },
+  { key: 'ph',            label: 'pH',      className: 'ph',          format: fmtPh,      domain: phDomain },
+]
 
-  if (times.length < 2) {
-    return (
-      <p className={styles.empty}>
-        Log at least two readings to see the fermentation curve.
-      </p>
-    )
+const fmtDay = (t) => new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+const fmtStamp = (t) => new Date(t).toLocaleString(undefined, {
+  month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+})
+
+export default function FermentationChart({ readings = [], og = null }) {
+  const times = useMemo(
+    () => readings.map((r) => new Date(r.recorded_at).getTime()).filter((t) => !Number.isNaN(t)),
+    [readings],
+  )
+
+  const panels = useMemo(() => {
+    return SERIES.map((s) => {
+      const points = readings
+        .map((r) => ({
+          t: new Date(r.recorded_at).getTime(),
+          v: r[s.key] == null ? null : Number(r[s.key]),
+        }))
+        .filter((p) => p.v != null && !Number.isNaN(p.t))
+
+      if (points.length === 0) return null
+
+      const values = points.map((p) => p.v)
+      const [lo, hi] = s.key === 'gravity' ? s.domain(values, og) : s.domain(values)
+      return { ...s, points, lo, hi, latest: points[points.length - 1].v }
+    }).filter(Boolean)
+  }, [readings, og])
+
+  if (times.length < 2 || panels.length === 0) {
+    return <p className={styles.empty}>Log at least two readings to see the fermentation curve.</p>
   }
 
   const tMin = Math.min(...times)
   const tMax = Math.max(...times)
   const tSpan = tMax - tMin || 1
 
-  const plotW = W - PAD.left - PAD.right
-  const plotH = H - PAD.top - PAD.bottom
-
-  const x = (t) => PAD.left + ((t - tMin) / tSpan) * plotW
-  const y = (v, min, max) => {
-    const span = max - min || 1
-    return PAD.top + plotH - ((v - min) / span) * plotH
-  }
-
-  function toggle(key) {
-    setHidden((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]))
-  }
+  const x = (t) => PAD.left + ((t - tMin) / tSpan) * PLOT_W
+  const y = (v, lo, hi) => PAD.top + PLOT_H - ((v - lo) / (hi - lo || 1)) * PLOT_H
 
   return (
     <div className={styles.wrap}>
-      <svg
-        className={styles.svg}
-        viewBox={`0 0 ${W} ${H}`}
-        role="img"
-        aria-label="Fermentation readings over time"
-        preserveAspectRatio="none"
-      >
-        {[0, 0.25, 0.5, 0.75, 1].map((f) => (
-          <line
-            key={f}
-            className={styles.gridline}
-            x1={PAD.left}
-            x2={W - PAD.right}
-            y1={PAD.top + plotH * f}
-            y2={PAD.top + plotH * f}
-          />
-        ))}
+      {panels.map((p) => (
+        <figure key={p.key} className={styles.panel}>
+          <figcaption className={styles.panelHead}>
+            <span className={styles.panelLabel}>{p.label}</span>
+            <span className={`${styles.panelValue} ${styles[p.className]}`}>
+              {p.format(p.latest)}
+            </span>
+          </figcaption>
 
-        {SERIES.map((s) => {
-          const data = series[s.key]
-          if (!data || hidden.includes(s.key)) return null
-          const d = data.points
-            .map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(p.t)} ${y(p.v, data.min, data.max)}`)
-            .join(' ')
-          return (
-            <g key={s.key}>
-              <path className={`${styles.line} ${styles[s.className]}`} d={d} />
-              {data.points.map((p) => (
-                <circle
-                  key={p.t}
-                  className={`${styles.dot} ${styles[s.className]}`}
-                  cx={x(p.t)}
-                  cy={y(p.v, data.min, data.max)}
-                  r="3"
+          <div className={styles.panelBody}>
+            <svg
+              className={styles.svg}
+              viewBox={`0 0 ${W} ${PANEL_H}`}
+              role="img"
+              aria-label={`${p.label} over time, ${p.format(p.lo)} to ${p.format(p.hi)}`}
+            >
+              {[0, 0.5, 1].map((f) => (
+                <line
+                  key={f}
+                  className={styles.gridline}
+                  x1={PAD.left}
+                  x2={W - PAD.right}
+                  y1={PAD.top + PLOT_H * f}
+                  y2={PAD.top + PLOT_H * f}
                 />
               ))}
-            </g>
-          )
-        })}
-      </svg>
 
-      <div className={styles.axis}>
-        <span>{new Date(tMin).toLocaleDateString()}</span>
-        <span>{new Date(tMax).toLocaleDateString()}</span>
+              {p.points.length > 1 && (
+                <path
+                  className={`${styles.line} ${styles[p.className]}`}
+                  d={p.points
+                    .map((pt, i) => `${i === 0 ? 'M' : 'L'} ${x(pt.t)} ${y(pt.v, p.lo, p.hi)}`)
+                    .join(' ')}
+                />
+              )}
+
+              {p.points.map((pt) => (
+                <circle
+                  key={pt.t}
+                  className={`${styles.dot} ${styles[p.className]}`}
+                  cx={x(pt.t)}
+                  cy={y(pt.v, p.lo, p.hi)}
+                  r="4"
+                >
+                  <title>{`${fmtStamp(pt.t)} — ${p.format(pt.v)}`}</title>
+                </circle>
+              ))}
+            </svg>
+
+            <div className={styles.yAxis}>
+              <span>{p.format(p.hi)}</span>
+              <span>{p.format(p.lo)}</span>
+            </div>
+          </div>
+        </figure>
+      ))}
+
+      <div className={styles.xAxis}>
+        <span>{fmtDay(tMin)}</span>
+        <span>{fmtDay(tMax)}</span>
       </div>
-
-      <ul className={styles.legend}>
-        {SERIES.map((s) => {
-          const data = series[s.key]
-          const off = hidden.includes(s.key)
-          return (
-            <li key={s.key}>
-              <button
-                type="button"
-                className={`${styles.legendBtn} ${off ? styles.off : ''}`}
-                onClick={() => toggle(s.key)}
-                disabled={!data}
-              >
-                <span className={`${styles.swatch} ${styles[s.className]}`} />
-                {s.label}
-                <span className={styles.range}>
-                  {data ? `${s.format(data.min)} – ${s.format(data.max)}` : 'no data'}
-                </span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
     </div>
   )
 }

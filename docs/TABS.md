@@ -438,7 +438,19 @@ yeastFactor: low 0.75 · medium 0.90 · high 1.25
 Split into four equal doses at **24h, 48h, 72h after pitch**, and at the **1/3 sugar break or day 7, whichever comes first**. Saving the schedule writes four `mead_additions` rows with `scheduled_at` set and `added_at` null; a dose is complete only when `added_at` is filled in. The fourth dose also stores its trigger gravity in `gravity_at_addition`, so it can fire on gravity rather than only on the calendar.
 
 ## Fermentation Chart
-Hand-rolled SVG in `components/FermentationChart` — the project has no charting dependency and three series over a handful of points does not warrant one. Gravity, temperature, and pH sit on incompatible scales, so each series is normalised against its own min/max and the legend carries its real range. Series can be toggled off.
+Hand-rolled SVG in `components/FermentationChart` — the project has no charting dependency and a handful of points does not warrant one.
+
+**Small multiples, not one overlaid plot.** Gravity moves in thousandths, temperature in degrees, pH in tenths. Drawing them together means three invented y-scales stacked on one plot, which manufactures crossings that mean nothing — the dual-axis mistake, tripled. Each measure gets its own panel on a shared time axis, and a panel with no data does not render.
+
+**Domains are chosen for meaning, not fitted to the data.** Fitting each series to its own min/max is what made a pH that moved 0.25 render as a full-height climb. Instead:
+
+- **Gravity** — `0.995` to OG, so the panel shows the journey to dry
+- **pH** — `2.8` to `4.2`, the band that matters for a must (3.0 is where fermentation stalls)
+- **Temperature** — centred on the data, never narrower than 20°F
+
+A series that barely moved has to look like a series that barely moved.
+
+Colors come from the app's tokens per `docs/STYLING.md`. Identity is carried by each panel's own label rather than by hue, so the palette is not load-bearing; the three tokens clear CVD separation comfortably regardless (worst adjacent ΔE 16.8 against a target of 8).
 
 ## Editing readings
 The readings table has an edit (✎) and a delete (✕) per row. Editing loads the row back into the log form and preserves its original `recorded_at` — a correction records when the reading was taken, not when the mistake was noticed. `update_mead_reading` and `delete_mead_reading` do the same over MCP.
