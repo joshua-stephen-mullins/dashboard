@@ -7,7 +7,10 @@ import BatchFormModal from './components/BatchFormModal/BatchFormModal'
 import BatchDetailModal from './components/BatchDetailModal/BatchDetailModal'
 import styles from './Mead.module.css'
 
-const ACTIVE = ['primary', 'secondary', 'bulk_aging']
+// Two different states, and they ask different things of you: a fermenting
+// batch wants nutrient doses and readings, an aging one wants to be left alone.
+const FERMENTING = ['primary']
+const AGING = ['secondary', 'bulk_aging']
 
 export default function MeadTab() {
   const { data: batches = [], isLoading, add, update, remove } = useMeadBatches()
@@ -29,13 +32,14 @@ export default function MeadTab() {
   )
 
   const summary = useMemo(() => {
-    const fermenting = batches.filter((b) => ACTIVE.includes(b.status)).length
+    const fermenting = batches.filter((b) => FERMENTING.includes(b.status)).length
+    const aging = batches.filter((b) => AGING.includes(b.status)).length
     const bottles = batches.reduce((sum, b) => sum + (b.bottles_remaining ?? 0), 0)
     const abvs = batches
       .map((b) => abv(b.og == null ? null : Number(b.og), b.fg == null ? null : Number(b.fg)))
       .filter((v) => v != null)
     const avgAbv = abvs.length ? abvs.reduce((a, b) => a + b, 0) / abvs.length : null
-    return { fermenting, bottles, avgAbv }
+    return { fermenting, aging, bottles, avgAbv }
   }, [batches])
 
   // Keep the open detail modal pointed at fresh data after a mutation.
@@ -86,6 +90,10 @@ export default function MeadTab() {
           <div className={styles.summaryStat}>
             <dt>Fermenting</dt>
             <dd>{summary.fermenting}</dd>
+          </div>
+          <div className={styles.summaryStat}>
+            <dt>Aging</dt>
+            <dd>{summary.aging}</dd>
           </div>
           <div className={styles.summaryStat}>
             <dt>Bottles on hand</dt>
