@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useMeadBatches } from './hooks/useMeadBatches'
+import { useDueDoses } from './hooks/useDueDoses'
 import { filterBatches } from './utils/filters'
-import { STYLES, STATUSES, abv } from './utils/calc'
+import { STYLES, STATUSES } from './utils/calc'
 import BatchCard from './components/BatchCard/BatchCard'
 import BatchFormModal from './components/BatchFormModal/BatchFormModal'
 import BatchDetailModal from './components/BatchDetailModal/BatchDetailModal'
@@ -14,6 +15,7 @@ const AGING = ['secondary', 'bulk_aging']
 
 export default function MeadTab() {
   const { data: batches = [], isLoading, add, update, remove } = useMeadBatches()
+  const { data: dosesDue = 0 } = useDueDoses()
 
   const [search, setSearch] = useState('')
   const [filterStyle, setFilterStyle] = useState('')
@@ -35,11 +37,7 @@ export default function MeadTab() {
     const fermenting = batches.filter((b) => FERMENTING.includes(b.status)).length
     const aging = batches.filter((b) => AGING.includes(b.status)).length
     const bottles = batches.reduce((sum, b) => sum + (b.bottles_remaining ?? 0), 0)
-    const abvs = batches
-      .map((b) => abv(b.og == null ? null : Number(b.og), b.fg == null ? null : Number(b.fg)))
-      .filter((v) => v != null)
-    const avgAbv = abvs.length ? abvs.reduce((a, b) => a + b, 0) / abvs.length : null
-    return { fermenting, aging, bottles, avgAbv }
+    return { fermenting, aging, bottles }
   }, [batches])
 
   // Keep the open detail modal pointed at fresh data after a mutation.
@@ -100,8 +98,8 @@ export default function MeadTab() {
             <dd>{summary.bottles}</dd>
           </div>
           <div className={styles.summaryStat}>
-            <dt>Avg ABV</dt>
-            <dd>{summary.avgAbv == null ? '—' : `${summary.avgAbv.toFixed(1)}%`}</dd>
+            <dt>Doses due</dt>
+            <dd className={dosesDue > 0 ? styles.due : undefined}>{dosesDue}</dd>
           </div>
         </dl>
       )}

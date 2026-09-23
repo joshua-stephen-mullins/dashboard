@@ -427,6 +427,15 @@ Nothing computed is ever stored. `src/tabs/mead/utils/calc.js` owns:
 - **Brix ↔ SG** — the standard cubic approximation
 - **1/3 sugar break** — `OG − (OG − 1) / 3`, the trigger for the final nutrient dose
 
+## Tab Summary
+Four tiles: **Fermenting** (`primary`), **Aging** (`secondary` + `bulk_aging`), **Bottles on hand**, and **Doses due**.
+
+Fermenting and Aging are deliberately separate — a fermenting batch wants nutrient doses and daily readings, an aging one wants to be left alone for months, and collapsing them hides whether anything needs attention.
+
+**Doses due** (`hooks/useDueDoses.js`) counts unticked nutrient doses across every batch and turns amber when non-zero. A dose comes due either by its scheduled time passing or by the batch reaching its trigger gravity, and the gravity case is relative to that batch's own latest reading — so the hook pulls pending doses plus the most recent gravity per batch and evaluates each batch separately through `dueDoses()`. Mutations on readings and additions both invalidate it.
+
+It replaced an average-ABV tile, which averaged across unrelated batches and styles and never asked anything of the user.
+
 ## TOSNA 3.0 Nutrient Calculator
 `src/tabs/mead/utils/tosna.js` implements Tailored Organic Staggered Nutrient Addition:
 

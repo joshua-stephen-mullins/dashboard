@@ -77,6 +77,10 @@
   color: var(--color-text);
 }
 
+.summaryStat dd.due {
+  color: var(--color-amber);
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;

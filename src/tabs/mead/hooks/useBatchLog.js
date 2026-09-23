@@ -23,7 +23,12 @@ async function fetchChild(table, orderBy, batchId) {
 function useChild(key, batchId) {
   const { table, orderBy } = TABLES[key]
   const qc = useQueryClient()
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['mead', key, batchId] })
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['mead', key, batchId] })
+    // Ticking off a dose, or logging a gravity that crosses a trigger, both
+    // change the tab's "doses due" count.
+    qc.invalidateQueries({ queryKey: ['mead_due_doses'] })
+  }
 
   const query = useQuery({
     queryKey: ['mead', key, batchId],
